@@ -1,6 +1,18 @@
-from quicklyRag.config.baseClass.MyAiConfig import MyAiConfig
+from typing import Optional
 
-
-class MySiliconflowAiConfig(MyAiConfig):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+class MySiliconflowAiConfig():
+    def __init__(
+            self,
+            base_url: Optional[str],
+            chat_model: Optional[str],
+            embedding_model: Optional[str],
+            key: Optional[str],
+            **kwargs
+    ):
+        self.base_url = base_url
+        self.chat_model = chat_model
+        self.embedding_model = embedding_model
+        self.key = key
+        # 动态设置额外参数
+        for key, value in kwargs.items():
+            setattr(self, key, value)

@@ -3,7 +3,12 @@ from quicklyRag.config.baseClass.MySiliconflowAiConfig import MySiliconflowAiCon
 from quicklyRag.config.baseClass.MyOllamaAiConfig import MyOllamaAiConfig
 
 
-MySiliconflowAiInfo = MySiliconflowAiConfig()
+MySiliconflowAiInfo = MySiliconflowAiConfig(
+    base_url='https://api.siliconflow.cn/v1',
+    chat_model='deepseek-ai/DeepSeek-R1-0528-Qwen3-8B',
+    embedding_model='BAAI/bge-m3',
+    key='硅基流动的key'
+)
 
 # 创建亚马逊平台gpt的配置
 MyAzureAiInfo = MyAzureAiConfig(
@@ -14,4 +19,8 @@ MyAzureAiInfo = MyAzureAiConfig(
 )
 
 # 创建本地Ollama的配置 可以使用默认的配置
-MyOllamaInfo = MyOllamaAiConfig()
+MyOllamaInfo = MyOllamaAiConfig(
+    base_url='http://127.0.0.1:11434',
+    chat_model='qwen3:0.6b',
+    embedding_model='qwen3-embedding:0.6b'
+)
