@@ -2,15 +2,18 @@ import os
 from functools import lru_cache
 import dotenv
 from langchain.chat_models import init_chat_model
+from langchain_core.embeddings import Embeddings
+from langchain_core.language_models import BaseChatModel
 from langchain_milvus import Milvus
 from langchain_ollama import OllamaEmbeddings, ChatOllama
 from langchain_openai import ChatOpenAI, AzureChatOpenAI, OpenAIEmbeddings
+from langchain_openai.chat_models.base import BaseChatOpenAI
 
-from quicklyRag.config.MyConfig import MySiliconflowAiInfo, MyAzureAiInfo, MyOllamaInfo
+from quicklyRag.config.PlatformConfig import MySiliconflowAiInfo, MyAzureAiInfo, MyOllamaInfo
 
 
 @lru_cache(maxsize=1)
-def siliconflow_llm():
+def siliconflow_llm() -> ChatOpenAI:
     return ChatOpenAI(
         model=MySiliconflowAiInfo.chat_model,
         base_url=MySiliconflowAiInfo.base_url,
@@ -18,20 +21,33 @@ def siliconflow_llm():
     )
 
 @lru_cache(maxsize=1)
-def azure_llm():
+def siliconflow_embed() -> OpenAIEmbeddings:
+    return OpenAIEmbeddings(
+        model=MySiliconflowAiInfo.embedding_model,
+        base_url=MySiliconflowAiInfo.base_url,
+        api_key=MySiliconflowAiInfo.key,
+    )
+
+@lru_cache(maxsize=1)
+def azure_llm() -> AzureChatOpenAI:
     return AzureChatOpenAI(
         api_key=MyAzureAiInfo.key,
         azure_endpoint=MyAzureAiInfo.base_url,
         api_version=MyAzureAiInfo.api_version,
         model=MyAzureAiInfo.chat_model,
-        temperature=0.7,
-        max_tokens=1000
     )
 
 @lru_cache(maxsize=1)
-def ollama_llm():
+def ollama_llm() -> ChatOllama:
     return ChatOllama(
         model=MyOllamaInfo.chat_model,
         base_url=MyAzureAiInfo.base_url,
     )
+@lru_cache(maxsize=1)
+def ollama_embed() -> ChatOllama:
+    return ChatOllama(
+        model=MyOllamaInfo.embedding_model,
+        base_url=MyAzureAiInfo.base_url,
+    )
+
 

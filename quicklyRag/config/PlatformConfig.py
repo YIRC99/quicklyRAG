@@ -2,7 +2,7 @@ from quicklyRag.config.baseClass.MyAzureAiConfig import MyAzureAiConfig
 from quicklyRag.config.baseClass.MySiliconflowAiConfig import MySiliconflowAiConfig
 from quicklyRag.config.baseClass.MyOllamaAiConfig import MyOllamaAiConfig
 
-
+# 硅基流动平台配置
 MySiliconflowAiInfo = MySiliconflowAiConfig(
     base_url='https://api.siliconflow.cn/v1',
     chat_model='deepseek-ai/DeepSeek-R1-0528-Qwen3-8B',

@@ -1,12 +1,13 @@
 from typing import Optional
 
+
 class MySiliconflowAiConfig():
     def __init__(
             self,
             base_url: Optional[str],
             chat_model: Optional[str],
-            embedding_model: Optional[str],
             key: Optional[str],
+            embedding_model: Optional[str] = None,
             **kwargs
     ):
         self.base_url = base_url

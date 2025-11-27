@@ -3,7 +3,7 @@ from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.memory import InMemorySaver
 from dataclasses import dataclass
 
-from quicklyRag.model.MyModel import siliconflow_llm
+from quicklyRag.model.MyModel import siliconflow_llm, siliconflow_embedding
 
 # checkpointer = InMemorySaver()
 #
@@ -51,4 +51,4 @@ from quicklyRag.model.MyModel import siliconflow_llm
 # )
 
 if __name__ == '__main__':
-    print(siliconflow_llm().invoke("你叫什么名字"))
+    print(siliconflow_embedding().embed_query("你好请问你是"))
