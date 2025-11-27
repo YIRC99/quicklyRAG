@@ -1,9 +1,8 @@
 from functools import lru_cache
 
 from langchain_milvus import Milvus
-
-from quicklyRag.config.VectorConfig import MyMilieusInfo
-
+from langchain_community.vectorstores import FAISS
+from quicklyRag.config.VectorConfig import MyMilieusInfo, MyFaissInfo
 
 @lru_cache(maxsize=1)
 def my_milvus() -> Milvus:
@@ -26,4 +25,17 @@ def my_milvus() -> Milvus:
             "metric_type": MyMilieusInfo.metric_type,  # 使用余弦相似度
             "index_type": MyMilieusInfo.index_type
         }
+    )
+
+@lru_cache(maxsize=1)
+def my_faiss() -> FAISS:
+    """
+    使用FAISS进行向量存储，基于VectorConfig中的MyFaissInfo配置
+    """
+    return FAISS(
+        embedding_function=MyFaissInfo.embedding,
+        index=None,  # FAISS索引对象，初次创建时为None
+        docstore=None,  # 文档存储，初次创建时为None
+        index_to_docstore_id={}  # 索引到文档ID的映射
+
     )
