@@ -1,9 +1,6 @@
 # 支持本地内存 redisSession Milvus 存储向量
-from quicklyRag.config.baseClass.MyFaissConfig import MyFaissConfig
-from quicklyRag.config.baseClass.MyMilvusConfig import MyMilvusConfig
-from quicklyRag.config.baseEnum.VectorIndexTypeEnum import VectorIndexType
-from quicklyRag.config.baseEnum.VectorMetricTypeEnum import VectorMetricType
-from quicklyRag.config.baseEnum.VectorStoreTypeEnum import VectorStorageType
+from quicklyRag.baseClass.VectorBase import MyMilvusConfig, MyFaissConfig
+from quicklyRag.baseEnum.VectorEnum import VectorStorageType, VectorMetricType, VectorIndexType
 from quicklyRag.model.MyModel import siliconflow_embed
 
 # 切换全局存储类型

@@ -1,6 +1,4 @@
-from quicklyRag.config.baseClass.MyAzureAiConfig import MyAzureAiConfig
-from quicklyRag.config.baseClass.MySiliconflowAiConfig import MySiliconflowAiConfig
-from quicklyRag.config.baseClass.MyOllamaAiConfig import MyOllamaAiConfig
+from quicklyRag.baseClass.PlatformBase import MySiliconflowAiConfig, MyAzureAiConfig, MyOllamaAiConfig
 
 # 硅基流动平台配置
 MySiliconflowAiInfo = MySiliconflowAiConfig(

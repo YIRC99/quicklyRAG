@@ -13,3 +13,16 @@ class VectorIndexType(Enum):
     RHNSW_FLAT = "RHNSW_FLAT"       # 基于 RHNSW 的 FLAT 索引
     RHNSW_SQ = "RHNSW_SQ"           # 基于 RHNSW 的标量量化索引
     RHNSW_PQ = "RHNSW_PQ"           # 基于 RHNSW 的乘积量化索引
+
+
+class VectorMetricType(Enum):
+    L2 = "L2"
+    COSINE = "COSINE"
+
+
+class VectorStorageType(Enum):
+    MEMORY = "memory"
+    REDIS = "redis"
+    MILVUS = "milvus"
+
+

@@ -1,3 +1,4 @@
+import uvicorn
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -13,5 +14,4 @@ async def say_hello(name: str):
     return {"message": f"Hello {name}"}
 
 if __name__ == '__main__':
-
     pass
