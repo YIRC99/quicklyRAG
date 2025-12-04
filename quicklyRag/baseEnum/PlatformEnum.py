@@ -5,3 +5,11 @@ class PlatformEmbeddingType(Enum):
     SILICONFLOW = 'SILICONFLOW'
     AZURE = 'AZURE'
     OLLAMA = 'OLLAMA'
+
+
+
+class PlatformVectorStoreType(Enum):
+    MILVUS = 'MILVUS'
+    FAISS = 'FAISS'
+
+

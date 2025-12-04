@@ -2,6 +2,9 @@ from functools import lru_cache
 
 from langchain_milvus import Milvus
 from langchain_community.vectorstores import FAISS
+
+from quicklyRag.baseEnum.PlatformEnum import PlatformVectorStoreType
+from quicklyRag.baseModel.vectorBase import QuicklyVectorStoreModel
 from quicklyRag.config.VectorConfig import MyMilieusInfo, MyFaissInfo
 
 @lru_cache(maxsize=1)
@@ -28,6 +31,10 @@ def my_milvus() -> Milvus:
     )
 
 @lru_cache(maxsize=1)
+def my_milvus2() -> QuicklyVectorStoreModel:
+    return QuicklyVectorStoreModel(PlatformVectorStoreType.MILVUS)
+
+@lru_cache(maxsize=1)
 def my_faiss() -> FAISS:
     """
     使用FAISS进行向量存储，基于VectorConfig中的MyFaissInfo配置
@@ -37,5 +44,8 @@ def my_faiss() -> FAISS:
         index=None,  # FAISS索引对象，初次创建时为None
         docstore=None,  # 文档存储，初次创建时为None
         index_to_docstore_id={}  # 索引到文档ID的映射
-
     )
+
+@lru_cache(maxsize=1)
+def my_faiss2() -> QuicklyVectorStoreModel:
+    return QuicklyVectorStoreModel(PlatformVectorStoreType.FAISS)

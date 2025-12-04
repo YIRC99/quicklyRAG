@@ -24,5 +24,6 @@ class VectorStorageType(Enum):
     MEMORY = "memory"
     REDIS = "redis"
     MILVUS = "milvus"
+    FAISS = 'FAISS'
 
 
