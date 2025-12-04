@@ -3,8 +3,8 @@ from quicklyRag.baseClass.VectorBase import MyMilvusConfig, MyFaissConfig
 from quicklyRag.baseEnum.VectorEnum import VectorStorageType, VectorMetricType, VectorIndexType
 from quicklyRag.model.MyModel import siliconflow_embed
 
-# 切换全局存储类型
-type = VectorStorageType.REDIS
+# 切换默认全局存储类型
+default_use_database_type = VectorStorageType.MILVUS
 
 MyMilieusInfo = MyMilvusConfig(
         host='99999999999',

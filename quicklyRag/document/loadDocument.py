@@ -42,8 +42,3 @@ def load_document(file_path: str | Path, rag_config: RagDocumentInfo = rag_docum
     loader = get_document_loader(file_path)
     documents = loader.load()
     return spliter_file(documents, rag_config)
-
-
-if __name__ == '__main__':
-    documents = load_document('./testmd.md',RagDocumentInfo(208,0))
-    print(documents)

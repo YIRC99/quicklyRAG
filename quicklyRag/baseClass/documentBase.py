@@ -14,3 +14,4 @@ class RagDocumentInfo:
         # Dynamically set additional parameters
         for key, value in kwargs.items():
             setattr(self, key, value)
+
