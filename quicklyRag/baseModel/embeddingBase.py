@@ -1,6 +1,8 @@
+from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_ollama import OllamaEmbeddings
 from langchain_openai import OpenAIEmbeddings
+from loguru import logger
 
 from quicklyRag.baseEnum.PlatformEnum import PlatformEmbeddingType
 from quicklyRag.config.PlatformConfig import MySiliconflowAiInfo, MyOllamaInfo
@@ -38,21 +40,39 @@ class QuicklyEmbeddingModel:
             base_url=MyOllamaInfo.base_url,
         )
 
-    def embedding_text(self, texts: str | list[str]) -> list[list[float]]:
+    def embedding_text(self, texts: str | list[str] | list[Document]) -> list[list[float]]:
+        """
+        对输入文本进行向量化。
+        Args:
+            texts (str | list[str] | list[Document]): 单个文本字符串、文本列表或 Document 对象列表。
+        Returns:
+            list[list[float]]: 对应的嵌入向量列表。
+        """
         try:
-            # LangChain 的 Embeddings.embed_documents 方法通常处理列表
+            processed_texts = [] # 用于存储最终要向量化的字符串
+
             if isinstance(texts, str):
-                embeddings = self._embeddings_model.embed_documents([texts])
-                return embeddings[0] if embeddings else []
+                processed_texts = [texts]
             elif isinstance(texts, list):
-                if not all(isinstance(t, str) for t in texts):
-                    raise TypeError("All items in the text list must be strings.")
-                return self._embeddings_model.embed_documents(texts)
+                if not texts:
+                     return []
+                # 检查列表内容并提取文本
+                for item in texts:
+                    if isinstance(item, Document):
+                        processed_texts.append(item.page_content)
+                    elif isinstance(item, str):
+                        processed_texts.append(item)
+                    else:
+                        raise TypeError(f"All items in the list must be strings or Document objects. Found: {type(item)}")
             else:
-                raise TypeError("Input 'texts' must be either a string or a list of strings.")
+                raise TypeError("Input 'texts' must be either a string, a list of strings, or a list of Document objects.")
+
+            # 调用底层模型的 embed_documents 方法，传入处理好的字符串列表
+            embeddings = self._embeddings_model.embed_documents(processed_texts)
+            return embeddings
         except Exception as e:
-            print(f"Error occurred during embedding with {self.platform_type}: {e}")
-            raise  # 重新抛出异常，让调用者知道发生了错误
+            logger.error(f"Embedding error: {e}", exc_info=True)
+            raise # 重新抛出异常，让调用者知道发生了错误
 
 
 
