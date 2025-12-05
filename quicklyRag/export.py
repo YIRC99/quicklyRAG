@@ -75,7 +75,11 @@ def vectorize_file(
         logger.error(f"处理文件 {file_path} 时发生错误: {str(e)}")
         return False
 
+# TODO 模型流式对话
+def llm_stream_chat():
+    pass
+
 
 if __name__ == '__main__':
-    success = vectorize_file('./document/testmd.md'
-                             ,embedding_type=PlatformEmbeddingType.OLLAMA)
+    success = vectorize_file('./document/testmd.md',embedding_type=PlatformEmbeddingType.SILICONFLOW)
+

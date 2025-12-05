@@ -8,7 +8,7 @@ default_embedding_use_platform = PlatformEmbeddingType.SILICONFLOW
 MySiliconflowAiInfo = MySiliconflowAiConfig(
     base_url='https://api.siliconflow.cn/v1',
     chat_model='deepseek-ai/DeepSeek-R1-0528-Qwen3-8B',
-    embedding_model='BAAI/bge-m3',
+    embedding_model='Qwen/Qwen3-Embedding-8B',
     key='硅基流动的key'
 )
 

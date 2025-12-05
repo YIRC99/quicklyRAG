@@ -16,7 +16,6 @@ def _normalize_documents(documents: list[Document] | Document | str) -> list[Doc
     else:
         raise TypeError("documents must be a string, Document, or list of Documents")
 
-
 def get_embedding_model(embedding_type: PlatformEmbeddingType = default_embedding_use_platform)-> QuicklyEmbeddingModelProvider:
     return QuicklyEmbeddingModelProvider(embedding_type)
 

@@ -105,8 +105,24 @@ class QuicklyEmbeddingModelProvider(Embeddings):
                 raise TypeError(
                     "Input 'texts' must be either a string, a list of strings, or a list of Document objects.")
 
-            embeddings = self._embeddings_model.embed_documents(processed_texts)
-            return embeddings
+            # 对于 SiliconFlow 平台，需要分批处理，每批最多32个
+            if self.platform_type == PlatformEmbeddingType.SILICONFLOW:
+                batch_size = 256
+                all_embeddings = []
+                
+                # 分批处理文档
+                for i in range(0, len(processed_texts), batch_size):
+                    batch_texts = processed_texts[i:i + batch_size]
+                    logger.info(f"处理文档批次 {i//batch_size + 1}/{(len(processed_texts)-1)//batch_size + 1}，包含 {len(batch_texts)} 个文档")
+                    batch_embeddings = self._embeddings_model.embed_documents(batch_texts)
+                    all_embeddings.extend(batch_embeddings)
+                    
+                return all_embeddings
+            else:
+                # 其他平台按原有方式处理
+                embeddings = self._embeddings_model.embed_documents(processed_texts)
+                return embeddings
+                
         except Exception as e:
             logger.error(f"Embedding error occurred: {str(e)}")
             raise

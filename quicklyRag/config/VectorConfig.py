@@ -18,13 +18,13 @@ MyMilieusInfo = MyMilvusConfig(
         collection_name='quicklyRag',
         metric_type=VectorMetricType.COSINE.value,  # 默认为COSINE 余弦相似度算法
         index_type=VectorIndexType.HNSW.value,
-        is_delete=True,
+        is_delete=False,
         auto_id=True,
         drop_old=True,
         embedding_model=QuicklyEmbeddingModelProvider(PlatformEmbeddingType.SILICONFLOW),
         enable_dynamic_field=False,
-        index_params={'M': 16, 'efConstruction': 64},
-        search_params={'ef': 64}
+        index_params={'M': 32, 'efConstruction': 128},
+        search_params={'ef': 128}
     )
 
 MyFaissInfo = MyFaissConfig(
