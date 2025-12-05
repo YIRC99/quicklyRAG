@@ -1,7 +1,7 @@
 from langchain_core.documents import Document
 from quicklyRag.baseEnum.VectorEnum import VectorStorageType
 from quicklyRag.config.VectorConfig import default_embedding_database_type
-from quicklyRag.factory.QuicklyVectorStoreFactory import QuicklyVectorStoreFactory
+from quicklyRag.provider.QuicklyVectorStoreProvider import QuicklyVectorStoreProvider
 
 
 def _normalize_documents(documents: list[Document] | Document | str) -> list[Document]:
@@ -17,11 +17,11 @@ def _normalize_documents(documents: list[Document] | Document | str) -> list[Doc
 
 
 
-def get_vectorstore_model(vectorstore_type: VectorStorageType = default_embedding_database_type) -> QuicklyVectorStoreFactory:
-    return QuicklyVectorStoreFactory(vectorstore_type)
+def get_vectorstore_model(vectorstore_type: VectorStorageType = default_embedding_database_type) -> QuicklyVectorStoreProvider:
+    return QuicklyVectorStoreProvider(vectorstore_type)
 
 # 只用来存储向量 可以传入存储库的类型 默认使用默认的向量存储库
-def store_vector_by_documents(documents: list[Document] | Document | str, vectorstore_type: VectorStorageType = default_embedding_database_type) -> QuicklyVectorStoreFactory:
+def store_vector_by_documents(documents: list[Document] | Document | str, vectorstore_type: VectorStorageType = default_embedding_database_type) -> QuicklyVectorStoreProvider:
     vectorstore_model = get_vectorstore_model(vectorstore_type)
     vectorstore_model.vector_store.add_documents(_normalize_documents(documents))
     return vectorstore_model

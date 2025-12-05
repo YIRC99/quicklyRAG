@@ -10,7 +10,7 @@ from quicklyRag.baseEnum.PlatformEnum import PlatformEmbeddingType
 from quicklyRag.config.PlatformConfig import MySiliconflowAiInfo, MyOllamaInfo
 
 
-class QuicklyEmbeddingModelFactory(Embeddings):
+class QuicklyEmbeddingModelProvider(Embeddings):
     """
     封装不同平台的嵌入模型，提供统一的 embedding_text 接口。
     """
@@ -25,7 +25,7 @@ class QuicklyEmbeddingModelFactory(Embeddings):
         if platform_type == PlatformEmbeddingType.SILICONFLOW:
             return self.__siliconflow_embed()
         elif platform_type == PlatformEmbeddingType.AZURE:
-            raise NotImplementedError("Azure embedding model factory not implemented yet.")
+            raise NotImplementedError("Azure embedding model provider not implemented yet.")
         elif platform_type == PlatformEmbeddingType.OLLAMA:
             return self.__ollama_embed()
         else:
@@ -91,3 +91,6 @@ class QuicklyEmbeddingModelFactory(Embeddings):
     # 实现 LangChain Embeddings 接口
     def embed_query(self, text: str) -> list[float]:
         return self._embeddings_model.embed_query(text)
+
+    def aaaa(self):
+        print('2222')

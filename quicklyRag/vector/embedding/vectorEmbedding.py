@@ -2,7 +2,7 @@ from langchain_core.documents import Document
 
 from quicklyRag.baseEnum.PlatformEnum import PlatformEmbeddingType
 from quicklyRag.config.PlatformConfig import default_embedding_use_platform
-from quicklyRag.factory.QuicklyEmbeddingModelFactory import QuicklyEmbeddingModelFactory
+from quicklyRag.provider.QuicklyEmbeddingModelProvider import QuicklyEmbeddingModelProvider
 
 
 def _normalize_documents(documents: list[Document] | Document | str) -> list[Document]:
@@ -17,8 +17,8 @@ def _normalize_documents(documents: list[Document] | Document | str) -> list[Doc
         raise TypeError("documents must be a string, Document, or list of Documents")
 
 
-def get_embedding_model(embedding_type: PlatformEmbeddingType = default_embedding_use_platform)-> QuicklyEmbeddingModelFactory:
-    return QuicklyEmbeddingModelFactory(embedding_type)
+def get_embedding_model(embedding_type: PlatformEmbeddingType = default_embedding_use_platform)-> QuicklyEmbeddingModelProvider:
+    return QuicklyEmbeddingModelProvider(embedding_type)
 
 def embed_document(documents: str | list[str] | list[Document],embedding_type: PlatformEmbeddingType = default_embedding_use_platform) -> list[list[float]]:
     model = get_embedding_model(embedding_type)
