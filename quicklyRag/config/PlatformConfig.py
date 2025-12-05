@@ -1,7 +1,7 @@
 from quicklyRag.baseClass.PlatformBase import MySiliconflowAiConfig, MyAzureAiConfig, MyOllamaAiConfig
 from quicklyRag.baseEnum.PlatformEnum import PlatformEmbeddingType
 
-#默认使用的平台
+#向量化默认使用的平台
 default_embedding_use_platform = PlatformEmbeddingType.SILICONFLOW
 
 # 硅基流动平台配置

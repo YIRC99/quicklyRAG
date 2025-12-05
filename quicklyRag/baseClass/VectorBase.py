@@ -5,13 +5,14 @@ from langchain_community.docstore import InMemoryDocstore
 from langchain_core.embeddings import Embeddings
 
 from quicklyRag.baseEnum.VectorEnum import VectorIndexType, VectorMetricType
+from quicklyRag.factory.QuicklyEmbeddingModelFactory import QuicklyEmbeddingModelFactory
 
 
 class MyMilvusConfig:
     def __init__(
             self,
             uri: Optional[str],
-            port: Optional[str],
+            port: Optional[str | int],
             user: Optional[str],
             password: Optional[str],
             collection_name: Optional[str],
@@ -19,7 +20,7 @@ class MyMilvusConfig:
             drop_old: Optional[bool],  # 是否删除已有集合   删除现有集合并重新创建
             metric_type: Optional[str],
             is_delete: Optional[bool],
-            embedding_model: Optional[Embeddings],
+            embedding_model: Optional[QuicklyEmbeddingModelFactory],
             index_type: Optional[str],
             enable_dynamic_field: Optional[bool] = False,
             **kwargs
@@ -45,7 +46,7 @@ class MyFaissConfig:
     def __init__(
             self,
             metric_type: Optional[VectorMetricType],  # 向量相似度计算类型，默认为COSINE（余弦相似度）
-            embedding: Optional[Embeddings],  # 嵌入模型实例
+            embedding: Optional[QuicklyEmbeddingModelFactory],  # 嵌入模型实例
             docstore: Optional[InMemoryDocstore],
             index: Optional[faiss.Index], # Fixed: Use proper faiss Index type
             **kwargs

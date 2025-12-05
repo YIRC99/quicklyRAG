@@ -3,11 +3,11 @@ import faiss
 from langchain_community.docstore import InMemoryDocstore
 
 from quicklyRag.baseClass.VectorBase import MyMilvusConfig, MyFaissConfig
-from quicklyRag.baseEnum.PlatformEnum import PlatformVectorStoreType
+from quicklyRag.baseEnum.PlatformEnum import PlatformVectorStoreType, PlatformEmbeddingType
 from quicklyRag.baseEnum.VectorEnum import VectorStorageType, VectorMetricType, VectorIndexType
-from quicklyRag.model.MyModel import siliconflow_embed
+from quicklyRag.factory.QuicklyEmbeddingModelFactory import QuicklyEmbeddingModelFactory
 
-# 切换默认全局存储类型
+# 向量存储 默认使用的向量库
 default_embedding_database_type = VectorStorageType.MILVUS
 
 MyMilieusInfo = MyMilvusConfig(
@@ -21,18 +21,17 @@ MyMilieusInfo = MyMilvusConfig(
         is_delete=True,
         auto_id=True,
         drop_old=True,
-        embedding_model=siliconflow_embed(),
+        embedding_model=QuicklyEmbeddingModelFactory(PlatformEmbeddingType.SILICONFLOW),
         enable_dynamic_field=False,
         index_params={'M': 16, 'efConstruction': 64},
         search_params={'ef': 64}
     )
 
-# For FAISS, we initialize with None values which will be properly set up later
 MyFaissInfo = MyFaissConfig(
         metric_type=VectorMetricType.COSINE,  # 默认为COSINE 余弦相似度算法
-        embedding=siliconflow_embed(),
-        docstore=InMemoryDocstore({}), # Initialize with empty dict
-        index=None, # Initialize with None, will be created by the FAISS vector store
+        embedding=QuicklyEmbeddingModelFactory(PlatformEmbeddingType.SILICONFLOW),
+        docstore=InMemoryDocstore({}),
+        index=None,
     )
 
 

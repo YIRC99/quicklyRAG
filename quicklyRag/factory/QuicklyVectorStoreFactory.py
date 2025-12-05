@@ -4,13 +4,12 @@ from langchain_community.docstore import InMemoryDocstore
 from langchain_community.vectorstores import FAISS
 from langchain_milvus import Milvus
 from loguru import logger
-# from functools import lru_cache # 别忘了导入 lru_cache
 from quicklyRag.baseEnum.PlatformEnum import PlatformVectorStoreType
 from quicklyRag.baseEnum.VectorEnum import VectorStorageType
 from quicklyRag.config.VectorConfig import MyMilieusInfo, MyFaissInfo
 
 
-class QuicklyVectorStoreModel:
+class QuicklyVectorStoreFactory:
     """
     封装不同平台的向量数据库，提供统一的基础接口。
     注意：由于 Milvus 和 FAISS 的 API 和生命周期管理差异较大，
@@ -18,14 +17,16 @@ class QuicklyVectorStoreModel:
     """
     def __init__(self, platform_type: VectorStorageType):
         """
-        初始化 QuicklyVectorStoreModel 实例。
+        初始化 QuicklyVectorStore 实例。
         Args:
             platform_type (PlatformVectorStoreType): 指定要使用的向量数据库平台类型。
         """
         self.platform_type = platform_type
         self._vector_store = self._get_vector_store_instance(platform_type)
 
-    def __create_milvus_store(self) -> Milvus: # 保持双下划线也可以，但作为静态方法更清晰
+    @staticmethod
+    @lru_cache(maxsize=1)
+    def __create_milvus_store() -> Milvus: # 保持双下划线也可以，但作为静态方法更清晰
         """【内部】创建并返回 Milvus 向量库实例 (单例)"""
         try:
             milvus_instance = Milvus(
@@ -52,7 +53,9 @@ class QuicklyVectorStoreModel:
             logger.error(f"Failed to connect to Milvus: {e}")
             raise
 
-    def __create_faiss_store(self) -> FAISS:
+    @staticmethod
+    @lru_cache(maxsize=1)
+    def __create_faiss_store() -> FAISS:
         """【内部】创建并返回 FAISS 向量库实例 (初始空状态, 单例)"""
         try:
             # Create a FAISS vector store with a dummy document to initialize properly
