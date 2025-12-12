@@ -1,11 +1,13 @@
+import warnings
 from functools import lru_cache
-from langchain_ollama import OllamaEmbeddings, ChatOllama
-from langchain_openai import ChatOpenAI, AzureChatOpenAI, OpenAIEmbeddings
+from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI, AzureChatOpenAI
 from quicklyRag.config.PlatformConfig import MySiliconflowAiInfo, MyAzureAiInfo, MyOllamaInfo
 
 
 @lru_cache(maxsize=1)
 def siliconflow_llm() -> ChatOpenAI:
+    warnings.warn("This method is deprecated. Use QuicklyChatModelProvider instead.", DeprecationWarning)
     return ChatOpenAI(
         model=MySiliconflowAiInfo.chat_model,
         base_url=MySiliconflowAiInfo.base_url,
@@ -15,6 +17,7 @@ def siliconflow_llm() -> ChatOpenAI:
 
 @lru_cache(maxsize=1)
 def azure_llm() -> AzureChatOpenAI:
+    warnings.warn("This method is deprecated. Use QuicklyChatModelProvider instead.", DeprecationWarning)
     return AzureChatOpenAI(
         api_key=MyAzureAiInfo.key,
         azure_endpoint=MyAzureAiInfo.base_url,
@@ -24,8 +27,8 @@ def azure_llm() -> AzureChatOpenAI:
 
 @lru_cache(maxsize=1)
 def ollama_llm() -> ChatOllama:
+    warnings.warn("This method is deprecated. Use QuicklyChatModelProvider instead.", DeprecationWarning)
     return ChatOllama(
         model=MyOllamaInfo.chat_model,
-        base_url=MyAzureAiInfo.base_url,
+        base_url=MyOllamaInfo.base_url,
     )
-

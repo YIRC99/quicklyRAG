@@ -5,19 +5,20 @@ from langchain_core.embeddings import Embeddings
 from langchain_ollama import OllamaEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from loguru import logger
+from pydantic import BaseModel, Field
 
 from quicklyRag.baseEnum.PlatformEnum import PlatformEmbeddingType
 from quicklyRag.config.PlatformConfig import MySiliconflowAiInfo, MyOllamaInfo
 
 
-
-
-class QuicklyEmbeddingModelProvider(Embeddings):
+class QuicklyEmbeddingModelProvider(BaseModel):
     """
     封装不同平台的嵌入模型，提供统一的 embedding_text 接口。
     """
-    def __init__(self, platform_type: PlatformEmbeddingType):
-        self.platform_type = platform_type
+    platform_type: PlatformEmbeddingType = Field(..., description="指定要使用的嵌入模型平台类型")
+
+    def __init__(self, platform_type: PlatformEmbeddingType, /, **data):
+        super().__init__(platform_type=platform_type, **data)
         try:
             self._embeddings_model: Embeddings = self._get_embedding_model_instance(platform_type)
         except Exception as e:

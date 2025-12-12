@@ -21,7 +21,6 @@ def _normalize_documents(documents: list[Document] | Document | str) -> list[Doc
     else:
         raise TypeError("documents must be a string, Document, or list of Documents")
 
-
 def get_vectorstore_model(vectorstore_type: VectorStorageType = default_embedding_database_type) -> QuicklyVectorStoreProvider:
     return QuicklyVectorStoreProvider(vectorstore_type)
 
@@ -39,27 +38,32 @@ def store_vector_by_documents(documents: list[Document] | Document | str, vector
     
     return vectorstore_model
 
-
 def search_by_scores(query: str,
                      topK:int = 10,
                      vectorstore_type: VectorStorageType = default_embedding_database_type,
                      embedding_type: PlatformEmbeddingType = default_embedding_use_platform) -> list[Document]:
     vectorstore_model = get_vectorstore_model(vectorstore_type)
-    # 使用 similarity_search_with_score 替代 similarity_search_with_relevance_scores
-    scores = vectorstore_model.vector_store.similarity_search_with_score(query,k=topK)
+    # 使用 similarity_search_with_score 进行向量搜索
+    # scores = vectorstore_model.vector_store.similarity_search_with_score(query, k=topK)
+
+    # 如果你想使用带有文本过滤的混合搜索，可以使用如下表达式：
+    scores = vectorstore_model.vector_store.similarity_search_with_score(
+        query,
+        k=topK,
+        expr='text like "%%大数据%%" and text like "%%应用%%" '  # 正确的LIKE语法
+    )
 
     reranker = QuicklyRerankerProvider()
     documents = [doc.page_content for doc, score in scores]
     results = reranker.rerank(query, documents, top_n=10)
-
 
     # 详细打印检索结果
     print(f"查询语句: {query}")
     print(f"检索到 {len(scores)} 个相关文档:")
     print("-" * 80)
     for idx, (doc, score) in enumerate(scores):
-        # 只显示前50个字符的内容
-        content_preview = doc.page_content[:2200] + "..." if len(doc.page_content) > 50 else doc.page_content
+        # 只显示前100个字符的内容
+        content_preview = doc.page_content[:100] + "..." if len(doc.page_content) > 100 else doc.page_content
 
         print(f"文档 {idx + 1}:")
         print(f"  内容预览: {content_preview}")
@@ -77,4 +81,4 @@ def search_by_scores(query: str,
 
 
 if __name__ == '__main__':
-    search_by_scores('江西省职业院校技能大赛中职组数字艺术设计赛项使用的技术')
+    search_by_scores('财税融合大数据应用赛项是什么')

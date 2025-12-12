@@ -1,11 +1,13 @@
 from functools import lru_cache
-from typing import Type
+from typing import Type, Any
 
 from langchain_community.docstore import InMemoryDocstore
 from langchain_community.vectorstores import FAISS
 from langchain_core.vectorstores import VectorStore
 from langchain_milvus import Milvus
 from loguru import logger
+from pydantic import BaseModel, Field
+
 from quicklyRag.baseEnum.PlatformEnum import PlatformVectorStoreType
 from quicklyRag.baseEnum.VectorEnum import VectorStorageType
 from quicklyRag.config.VectorConfig import MyMilieusInfo, MyFaissInfo
@@ -14,13 +16,15 @@ class VectorStoreInitializationError(Exception):
     """当向量数据库初始化失败时抛出的异常"""
     pass
 
-class QuicklyVectorStoreProvider:
+class QuicklyVectorStoreProvider(BaseModel):
     """
     统一向量数据库服务提供者。
     根据指定的 VectorStorageType 和预定义配置，提供并管理对应的 VectorStore 实例（单例）。
     该类负责处理连接、初始化错误，并提供对底层 VectorStore 实例的访问。
     """
-    def __init__(self, platform_type: VectorStorageType):
+    platform_type: VectorStorageType = Field(..., description="指定要使用的向量数据库平台类型")
+
+    def __init__(self, platform_type: VectorStorageType, /, **data: Any):
         """
         初始化 QuicklyVectorStoreProvider 实例。
         Args:
@@ -29,7 +33,7 @@ class QuicklyVectorStoreProvider:
             VectorStoreInitializationError: 如果指定平台的向量库初始化失败。
             ValueError: 如果 platform_type 不受支持。
         """
-        self.platform_type = platform_type
+        super().__init__(platform_type=platform_type, **data)
         self._vector_store: VectorStore | None = None
         try:
             self._vector_store = self._get_vector_store_instance(platform_type)
@@ -56,7 +60,7 @@ class QuicklyVectorStoreProvider:
                 collection_name=MyMilieusInfo.collection_name,
                 auto_id=True,
                 enable_dynamic_field=False,
-                drop_old=MyMilieusInfo.is_delete,
+                drop_old=MyMilieusInfo.drop_old,
                 consistency_level="Strong",
                 index_params={
                     "metric_type": MyMilieusInfo.metric_type,
@@ -120,4 +124,3 @@ class QuicklyVectorStoreProvider:
     def is_available(self) -> bool:
         """检查向量库实例是否已成功初始化并可用。"""
         return self._vector_store is not None
-

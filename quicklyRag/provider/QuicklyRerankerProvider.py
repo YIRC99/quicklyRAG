@@ -2,23 +2,25 @@ import json
 from typing import List, Dict, Any, Optional
 import httpx
 from loguru import logger
+from pydantic import BaseModel, Field
 
 from quicklyRag.config.PlatformConfig import MySiliconflowAiInfo
 
 
-class QuicklyRerankerProvider:
+class QuicklyRerankerProvider(BaseModel):
     """
     硅基流动平台重排序模型服务提供者。
     提供对文档进行重排序的功能，使用 SiliconFlow 的 rerank API。
     """
-
-    def __init__(self, model: str = "Qwen/Qwen3-Reranker-0.6B"):
+    model: str = Field(..., description="指定要使用的重排模型平台类型")
+    def __init__(self, /, model: str = "Qwen/Qwen3-Reranker-0.6B", **data: Any):
         """
         初始化重排序服务提供者。
         
         Args:
             model: 重排序模型名称，默认使用 BAAI/bge-reranker-v2-m3
         """
+        super().__init__(**data)
         self.base_url = MySiliconflowAiInfo.base_url.rstrip('/')
         self.api_key = MySiliconflowAiInfo.key
         self.model = model

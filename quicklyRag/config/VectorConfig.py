@@ -2,15 +2,15 @@
 import faiss
 from langchain_community.docstore import InMemoryDocstore
 
-from quicklyRag.baseClass.VectorBase import MyMilvusConfig, MyFaissConfig
-from quicklyRag.baseEnum.PlatformEnum import PlatformVectorStoreType, PlatformEmbeddingType
+from quicklyRag.baseClass.VectorBase import QuicklyMilvusConfig, MyFaissConfig
+from quicklyRag.baseEnum.PlatformEnum import PlatformEmbeddingType
 from quicklyRag.baseEnum.VectorEnum import VectorStorageType, VectorMetricType, VectorIndexType
 from quicklyRag.provider.QuicklyEmbeddingModelProvider import QuicklyEmbeddingModelProvider
 
 # 向量存储 默认使用的向量库
 default_embedding_database_type = VectorStorageType.MILVUS
 
-MyMilieusInfo = MyMilvusConfig(
+MyMilieusInfo = QuicklyMilvusConfig(
         uri='99999999999',
         user='',
         password='',
@@ -18,7 +18,6 @@ MyMilieusInfo = MyMilvusConfig(
         collection_name='quicklyRag',
         metric_type=VectorMetricType.COSINE.value,  # 默认为COSINE 余弦相似度算法
         index_type=VectorIndexType.HNSW.value,
-        is_delete=False,
         auto_id=True,
         drop_old=True,
         embedding_model=QuicklyEmbeddingModelProvider(PlatformEmbeddingType.SILICONFLOW),

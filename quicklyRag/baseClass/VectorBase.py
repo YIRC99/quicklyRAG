@@ -6,39 +6,23 @@ from langchain_core.embeddings import Embeddings
 
 from quicklyRag.baseEnum.VectorEnum import VectorIndexType, VectorMetricType
 from quicklyRag.provider.QuicklyEmbeddingModelProvider import QuicklyEmbeddingModelProvider
+from pydantic import BaseModel, Field
 
+class QuicklyMilvusConfig(BaseModel):
+    uri: str = Field(..., description="Milvus的服务地址")
+    port: str | int = Field(..., description="Milvus的服务端口")
+    user: str = Field(..., description="Milvus的用户名")
+    password: str = Field(..., description="Milvus的密码")
+    collection_name: str = Field(..., description="Milvus的集合名称")
+    auto_id: bool = Field(..., description="是否自动生成ID")
+    drop_old: bool = Field(..., description="是否删除已有集合   删除现有集合并重新创建")
+    metric_type: str = Field(..., description="向量相似度计算类型")
+    embedding_model: QuicklyEmbeddingModelProvider = Field(..., description="嵌入模型实例")
+    index_type: str = Field(..., description="向量索引类型")
+    enable_dynamic_field: bool = Field(..., description="是否启用动态字段")
+    index_params: dict = Field(..., description="向量索引参数")
+    search_params: dict = Field(..., description="向量搜索参数")
 
-class MyMilvusConfig:
-    def __init__(
-            self,
-            uri: Optional[str],
-            port: Optional[str | int],
-            user: Optional[str],
-            password: Optional[str],
-            collection_name: Optional[str],
-            auto_id: Optional[bool],  # 是否自动生成ID
-            drop_old: Optional[bool],  # 是否删除已有集合   删除现有集合并重新创建
-            metric_type: Optional[str],
-            is_delete: Optional[bool],
-            embedding_model: Optional[QuicklyEmbeddingModelProvider],
-            index_type: Optional[str],
-            enable_dynamic_field: Optional[bool] = False,
-            **kwargs
-    ):
-        self.uri = uri
-        self.port = port
-        self.user = user
-        self.password = password
-        self.collection_name = collection_name
-        self.auto_id = auto_id
-        self.drop_old = drop_old
-        self.metric_type = metric_type
-        self.embedding_model = embedding_model
-        self.index_type = index_type
-        self.is_delete = is_delete
-        self.enable_dynamic_field = enable_dynamic_field
-        for key, value in kwargs.items():
-            setattr(self, key, value)
 
 
 

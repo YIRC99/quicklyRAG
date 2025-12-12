@@ -21,9 +21,8 @@ class VectorMetricType(Enum):
 
 
 class VectorStorageType(Enum):
-    MEMORY = "memory"
-    REDIS = "redis"
+    # REDIS = "redis" 暂不支持
     MILVUS = "milvus"
-    FAISS = 'FAISS'
+    # FAISS = 'FAISS'暂不支持
 
 

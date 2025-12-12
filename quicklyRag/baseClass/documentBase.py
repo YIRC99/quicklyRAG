@@ -1,17 +1,6 @@
-from typing import Optional
+from pydantic import BaseModel, Field
 
 
-class RagDocumentInfo:
-    def __init__(
-            self,
-            chunk_size: Optional[int] = None,
-            chunk_overlap: Optional[int] = None,
-            **kwargs
-    ):
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
-
-        # Dynamically set additional parameters
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
+class RagDocumentInfo(BaseModel):
+    chunk_size: int = Field(default=300, description="文档分块大小")
+    chunk_overlap: int = Field(default=60, description="文档分块重叠大小")
