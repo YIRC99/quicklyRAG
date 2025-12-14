@@ -11,7 +11,7 @@ from quicklyRag.baseEnum.PlatformEnum import PlatformEmbeddingType
 from quicklyRag.config.PlatformConfig import MySiliconflowAiInfo, MyOllamaInfo
 
 
-class QuicklyEmbeddingModelProvider(BaseModel):
+class QuicklyEmbeddingModelProvider(Embeddings,BaseModel):
     """
     封装不同平台的嵌入模型，提供统一的 embedding_text 接口。
     """

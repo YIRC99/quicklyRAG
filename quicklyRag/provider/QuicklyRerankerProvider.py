@@ -3,7 +3,6 @@ from typing import List, Dict, Any, Optional
 import httpx
 from loguru import logger
 from pydantic import BaseModel, Field
-
 from quicklyRag.config.PlatformConfig import MySiliconflowAiInfo
 
 

@@ -38,6 +38,7 @@ def store_vector_by_documents(documents: list[Document] | Document | str, vector
     
     return vectorstore_model
 
+# TODO 这是一个向量检索的方法, 但是因为直接检索效果不好, 但是用算法优化又会有其他的开销, 所有是否要优化还待定
 def search_by_scores(query: str,
                      topK:int = 10,
                      vectorstore_type: VectorStorageType = default_embedding_database_type,
