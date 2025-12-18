@@ -1,3 +1,4 @@
+import traceback
 from functools import lru_cache
 from httpx import ConnectError, TimeoutException
 from langchain_core.documents import Document
@@ -19,6 +20,7 @@ class QuicklyEmbeddingModelProvider(Embeddings,BaseModel):
 
     def __init__(self, platform_type: PlatformEmbeddingType, /, **data):
         super().__init__(platform_type=platform_type, **data)
+        self._embeddings_model: Embeddings | None = None
         try:
             self._embeddings_model: Embeddings = self._get_embedding_model_instance(platform_type)
         except Exception as e:

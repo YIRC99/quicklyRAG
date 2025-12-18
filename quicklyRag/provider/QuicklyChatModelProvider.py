@@ -128,3 +128,6 @@ class QuicklyChatModelProvider(BaseModel):
     def is_available(self) -> bool:
         """检查聊天模型实例是否已成功初始化并可用。"""
         return self._chat_model is not None
+
+    def invoke(self, input: str, **kwargs):
+        return self.chat_model.invoke(input, **kwargs)
