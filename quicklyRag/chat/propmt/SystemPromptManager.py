@@ -1,6 +1,8 @@
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, ClassVar
 from pathlib import Path
 import time
+
+from loguru import logger
 from pydantic import BaseModel, Field
 
 
@@ -9,7 +11,7 @@ class SystemPromptInfo(BaseModel):
     系统提示词信息类
     """
     name: str = Field(..., description="系统提示词名称")
-    file_path: str = Field(..., description="系统提示词文件路径")
+    file_path: str | Path = Field(..., description="系统提示词文件路径")
     content: str = Field(default="", description="系统提示词内容")
     last_modified: float = Field(default=0.0, description="最后修改时间戳")
     loaded_at: float = Field(default=0.0, description="加载时间戳")
@@ -20,7 +22,10 @@ class SystemPromptManager(BaseModel):
     系统提示词管理器
     负责管理多个系统提示词，支持文件I/O读取和内存缓存
     """
-    
+
+    # 默认的系统提示词路径
+    system_prompt_path: ClassVar[Path] = Path(__file__).parent / "system.md"
+
     prompts: Dict[str, SystemPromptInfo] = Field(
         default_factory=dict, 
         description="存储系统提示词信息的字典"
@@ -29,7 +34,7 @@ class SystemPromptManager(BaseModel):
     def __init__(self, **data):
         super().__init__(**data)
         # 默认初始化加载 system.md 文件
-        system_md_path = Path(__file__).parent / "system.md"
+        system_md_path = self.system_prompt_path
         if system_md_path.exists():
             self.add_prompt("system", str(system_md_path))
     
@@ -59,8 +64,10 @@ class SystemPromptManager(BaseModel):
         else:
             # 如果是新的提示词，创建新的SystemPromptInfo
             if file_path is None:
-                raise ValueError(f"首次获取提示词 '{name}' 时必须提供文件路径")
-            
+                # 如果不存在就默认为使用 system.md 文件
+                file_path = self.system_prompt_path
+                logger.error(f'提示词名称不存在, 使用系统默认的提示词, 默认的提示词路径为: {file_path}')
+
             prompt_info = SystemPromptInfo(name=name, file_path=file_path)
             self.prompts[name] = prompt_info
             self._load_prompt_content(prompt_info)

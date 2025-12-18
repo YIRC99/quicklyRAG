@@ -27,10 +27,7 @@ class Message(BaseModel):
             self.timestamp = datetime.now()
 
 
-# TODO 这个类还有点问题, 就是这个用来管理单个用户的非常好用,
-# 但是对于不同的用户, 就无法管理类, 如果有多个用户, 就没办法了
-# 所以还需要设计一个顶层的类, 用key value的方式,去映射ChatMessageManager类
-# 就可以实现多用户对话记忆管理了
+
 class ChatMessageManager:
     """聊天消息管理器"""
 
