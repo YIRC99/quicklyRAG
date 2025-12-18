@@ -51,12 +51,15 @@ def search_by_scores(query: str,
     scores = vectorstore_model.vector_store.similarity_search_with_score(
         query,
         k=topK,
-        expr='text like "%%大数据%%" and text like "%%应用%%" '  # 正确的LIKE语法
+        # expr='text like "%%大数据%%" and text like "%%应用%%" '  # 正确的LIKE语法
     )
 
+    # 使用重排模型查询
     reranker = QuicklyRerankerProvider()
     documents = [doc.page_content for doc, score in scores]
-    results = reranker.rerank(query, documents, top_n=10)
+    results = []
+    if len(documents) > 0:
+        results = reranker.rerank(query, documents, top_n=10)
 
     # 详细打印检索结果
     print(f"查询语句: {query}")
@@ -82,4 +85,5 @@ def search_by_scores(query: str,
 
 
 if __name__ == '__main__':
+
     search_by_scores('财税融合大数据应用赛项是什么')

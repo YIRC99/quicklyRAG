@@ -120,6 +120,8 @@ def llm_stream_chat(question: str,
 
 
 if __name__ == '__main__':
-    print(llm_stream_chat(question='你好, 你是谁',
-                          user_id='a8c67b91-f9c7-46d2-8610-bc1a8ea82e63',
-                          prompt_name='system2'))
+
+    # print(llm_stream_chat(question='你好, 你是谁',
+    #                       user_id='a8c67b91-f9c7-46d2-8610-bc1a8ea82e63',
+    #                       prompt_name='system2'))
+    print()

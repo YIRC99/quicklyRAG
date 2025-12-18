@@ -11,19 +11,11 @@ class QuicklyRerankerProvider(BaseModel):
     硅基流动平台重排序模型服务提供者。
     提供对文档进行重排序的功能，使用 SiliconFlow 的 rerank API。
     """
-    model: str = Field(..., description="指定要使用的重排模型平台类型")
-    def __init__(self, /, model: str = "Qwen/Qwen3-Reranker-0.6B", **data: Any):
-        """
-        初始化重排序服务提供者。
-        
-        Args:
-            model: 重排序模型名称，默认使用 BAAI/bge-reranker-v2-m3
-        """
-        super().__init__(**data)
-        self.base_url = MySiliconflowAiInfo.base_url.rstrip('/')
-        self.api_key = MySiliconflowAiInfo.key
-        self.model = model
-        self.rerank_url = f"{self.base_url}/rerank"
+    model: str = Field(default='Qwen/Qwen3-Reranker-0.6B', description="指定要使用的重排模型平台类型")
+    base_url: str = Field(default=MySiliconflowAiInfo.base_url.rstrip('/'), description="请求的地址")
+    api_key: str = Field(default=MySiliconflowAiInfo.key, description="平台的密钥")
+    rerank_url: str = Field(default=MySiliconflowAiInfo.base_url.rstrip('/') + '/rerank', description="重排模型的地址")
+
 
     def rerank(self,
                query: str,
