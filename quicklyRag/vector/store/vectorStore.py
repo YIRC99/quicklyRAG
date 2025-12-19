@@ -1,15 +1,33 @@
-from langchain_classic.retrievers import ContextualCompressionRetriever
-from langchain_core.documents import Document
+import cProfile
+import pstats
+from enum import Enum
 
-from quicklyRag.baseEnum.PlatformEnum import PlatformEmbeddingType
+# from langchain_classic.retrievers import ContextualCompressionRetriever
+from langchain_core.documents import Document
+from loguru import logger
+from pydantic import BaseModel, Field
+
+# from quicklyRag.baseEnum.PlatformEnum import PlatformEmbeddingType
 from quicklyRag.baseEnum.VectorEnum import VectorStorageType
-from quicklyRag.config.PlatformConfig import default_embedding_use_platform
+# from quicklyRag.config.PlatformConfig import default_embedding_use_platform
 from quicklyRag.config.VectorConfig import default_embedding_database_type
 from quicklyRag.provider.QuicklyRerankerProvider import QuicklyRerankerProvider
 from quicklyRag.provider.QuicklyVectorStoreProvider import QuicklyVectorStoreProvider
-from quicklyRag.vector.embedding.vectorEmbedding import embed_document
+# from quicklyRag.vector.embedding.vectorEmbedding import embed_document
 
 
+class VectorSearchResult(BaseModel):
+    text: str = Field(description="文档内容")
+    relevance_score: float = Field(description="重排模型分数")
+    score: float = Field(description="向量搜索分数")
+
+
+class ScoreField(Enum):
+    RELEVANCE = "relevance_score"
+    VECTOR = "score"
+    AUTO = 'auto'
+
+# 将输入数据转换为文档对象列表
 def _normalize_documents(documents: list[Document] | Document | str) -> list[Document]:
     """将输入数据转换为文档对象列表。"""
     if isinstance(documents, str):
@@ -21,69 +39,104 @@ def _normalize_documents(documents: list[Document] | Document | str) -> list[Doc
     else:
         raise TypeError("documents must be a string, Document, or list of Documents")
 
-def get_vectorstore_model(vectorstore_type: VectorStorageType = default_embedding_database_type) -> QuicklyVectorStoreProvider:
+# 获取向量存储库
+def get_vectorstore_model(
+        vectorstore_type: VectorStorageType = default_embedding_database_type) -> QuicklyVectorStoreProvider:
     return QuicklyVectorStoreProvider(vectorstore_type)
 
+
 # 只用来存储向量 可以传入存储库的类型 默认使用默认的向量存储库
-def store_vector_by_documents(documents: list[Document] | Document | str, vectorstore_type: VectorStorageType = default_embedding_database_type) -> QuicklyVectorStoreProvider:
+def store_vector_by_documents(documents: list[Document] | Document | str,
+                              vectorstore_type: VectorStorageType = default_embedding_database_type) -> QuicklyVectorStoreProvider:
     vectorstore_model = get_vectorstore_model(vectorstore_type)
     normalized_docs = _normalize_documents(documents)
-    
+
     # 对文档进行分批处理，每批最多32个文档，避免超过Milvus的限制
     batch_size = 256
     for i in range(0, len(normalized_docs), batch_size):
         batch_docs = normalized_docs[i:i + batch_size]
         vectorstore_model.vector_store.add_documents(batch_docs)
-        print(f"已存储文档批次 {i//batch_size + 1}/{(len(normalized_docs)-1)//batch_size + 1}，包含 {len(batch_docs)} 个文档")
-    
+        print(
+            f"已存储文档批次 {i // batch_size + 1}/{(len(normalized_docs) - 1) // batch_size + 1}，包含 {len(batch_docs)} 个文档")
+
     return vectorstore_model
 
-# TODO 这是一个向量检索的方法, 但是因为直接检索效果不好, 但是用算法优化又会有其他的开销, 所有是否要优化还待定
+
+# 将重排模型和向量检索的结果合并格式化
+def format_vectorstore_result(is_ranker: bool, ranker_arr: list[dict], scores: list[tuple[Document, float]]) -> list[VectorSearchResult]:
+    results = []
+    if is_ranker:
+        for i in ranker_arr:
+            results.append(VectorSearchResult(text=i['document'].get('text'), relevance_score=i['relevance_score'],
+                                              score=scores[int(i['index'])][1]))
+    else:
+        for i in scores:
+            results.append(VectorSearchResult(text=i[0].page_content, relevance_score=0, score=i[1]))
+    return results
+
+
+# 根据传入的字段名(target_field)动态过滤结果
+def filter_results_dynamic(results: list[VectorSearchResult],
+                           threshold: float,
+                           target_field: str) -> list[VectorSearchResult]:
+    filtered_data = []
+    for res in results:
+        val = getattr(res, target_field, 0.0)
+        if val >= threshold:
+            filtered_data.append(res)
+    return filtered_data
+
+
+# 向量检索的方法, 但是因为直接检索效果不好, 但是用算法优化又会有其他的开销, 但是不优化了
 def search_by_scores(query: str,
-                     topK:int = 10,
-                     vectorstore_type: VectorStorageType = default_embedding_database_type,
-                     embedding_type: PlatformEmbeddingType = default_embedding_use_platform) -> list[Document]:
+                     top_k: int = 10,
+                     score: float = 0.3,
+                     filter_strategy: ScoreField = ScoreField.AUTO,
+                     vectorstore_type: VectorStorageType = default_embedding_database_type) -> list[VectorSearchResult]:
     vectorstore_model = get_vectorstore_model(vectorstore_type)
-    # 使用 similarity_search_with_score 进行向量搜索
-    # scores = vectorstore_model.vector_store.similarity_search_with_score(query, k=topK)
 
     # 如果你想使用带有文本过滤的混合搜索，可以使用如下表达式：
     scores = vectorstore_model.vector_store.similarity_search_with_score(
         query,
-        k=topK,
-        # expr='text like "%%大数据%%" and text like "%%应用%%" '  # 正确的LIKE语法
+        k=top_k,
+        # expr='text like "%%大数据%%" and text like "%%应用%%" '  # 正确的LIKE语法  ---->暂时不用
     )
 
-    # 使用重排模型查询
-    reranker = QuicklyRerankerProvider()
-    documents = [doc.page_content for doc, score in scores]
-    results = []
-    if len(documents) > 0:
-        results = reranker.rerank(query, documents, top_n=10)
+    # 使用重排模型查询 防止重排模型未配置时会查询报错
+    is_ranker = False
+    ranker_arr = []
+    try:
+        reranker = QuicklyRerankerProvider()
+        documents = [doc.page_content for doc, score in scores]
 
-    # 详细打印检索结果
-    print(f"查询语句: {query}")
-    print(f"检索到 {len(scores)} 个相关文档:")
-    print("-" * 80)
-    for idx, (doc, score) in enumerate(scores):
-        # 只显示前100个字符的内容
-        content_preview = doc.page_content[:100] + "..." if len(doc.page_content) > 100 else doc.page_content
+        if len(documents) > 0:
+            ranker_arr = reranker.rerank(query, documents, top_n=top_k)
+            is_ranker = True
+    except Exception as e:
+        is_ranker = False
+        logger.warning(f"重排模型查询出错-使用默认召回查询: {e}")
 
-        print(f"文档 {idx + 1}:")
-        print(f"  内容预览: {content_preview}")
-        print(f"  相似度分数: {score:.4f}")
+    all_results = format_vectorstore_result(is_ranker, ranker_arr, scores)
 
-        # 打印元数据（如果存在）
-        if doc.metadata:
-            print(f"  元数据: {doc.metadata}")
+    if filter_strategy.value == "auto":
+        # 如果重排成功，就用重排分过滤，否则用向量分
+        if is_ranker:
+            target_field = "relevance_score"
+            logger.info(f"使用重排分数过滤 (阈值: {score})")
         else:
-            print("  元数据: 无")
-        print("-" * 80)
+            target_field = "score"
+            logger.info(f"重排未启用或失败，使用向量分数过滤 (阈值: {score})")
+    else:
+        # 强制指定了要过滤的字段
+        target_field = filter_strategy.value
 
-    vector = embed_document(query)
-    return scores
+    # 3. 执行动态过滤
+    final_results = filter_results_dynamic(all_results, score, target_field)
+
+    # 格式化并且合并两种查询的结果
+    return final_results
 
 
 if __name__ == '__main__':
+    print(search_by_scores('财税融合大数据应用赛项是什么', score=0.4, filter_strategy=ScoreField.RELEVANCE))
 
-    search_by_scores('财税融合大数据应用赛项是什么')
