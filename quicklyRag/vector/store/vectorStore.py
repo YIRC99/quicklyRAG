@@ -27,6 +27,15 @@ class ScoreField(Enum):
     VECTOR = "score"
     AUTO = 'auto'
 
+# 向量搜索的查询参数类, 只有query是必须传入的
+class VectorSearchParams(BaseModel):
+    query: str = Field(..., description="查询内容")
+    top_k: int = Field(default=10, description="返回的文档数量")
+    score: float = Field(default=0.3, description="文档过滤分数")
+    filter_strategy: ScoreField = Field(default=ScoreField.AUTO, description="过滤策略")
+    vectorstore_type: VectorStorageType = Field(default=default_embedding_database_type, description="向量存储库类型")
+
+
 # 将输入数据转换为文档对象列表
 def _normalize_documents(documents: list[Document] | Document | str) -> list[Document]:
     """将输入数据转换为文档对象列表。"""
@@ -88,17 +97,13 @@ def filter_results_dynamic(results: list[VectorSearchResult],
 
 
 # 向量检索的方法, 但是因为直接检索效果不好, 但是用算法优化又会有其他的开销, 但是不优化了
-def search_by_scores(query: str,
-                     top_k: int = 10,
-                     score: float = 0.3,
-                     filter_strategy: ScoreField = ScoreField.AUTO,
-                     vectorstore_type: VectorStorageType = default_embedding_database_type) -> list[VectorSearchResult]:
-    vectorstore_model = get_vectorstore_model(vectorstore_type)
+def search_by_scores(search_params :VectorSearchParams) -> list[VectorSearchResult]:
+    vectorstore_model = get_vectorstore_model(search_params.vectorstore_type)
 
     # 如果你想使用带有文本过滤的混合搜索，可以使用如下表达式：
     scores = vectorstore_model.vector_store.similarity_search_with_score(
-        query,
-        k=top_k,
+        search_params.query,
+        k=search_params.top_k,
         # expr='text like "%%大数据%%" and text like "%%应用%%" '  # 正确的LIKE语法  ---->暂时不用
     )
 
@@ -110,7 +115,7 @@ def search_by_scores(query: str,
         documents = [doc.page_content for doc, score in scores]
 
         if len(documents) > 0:
-            ranker_arr = reranker.rerank(query, documents, top_n=top_k)
+            ranker_arr = reranker.rerank(search_params.query, documents, top_n=search_params.top_k)
             is_ranker = True
     except Exception as e:
         is_ranker = False
@@ -118,25 +123,26 @@ def search_by_scores(query: str,
 
     all_results = format_vectorstore_result(is_ranker, ranker_arr, scores)
 
-    if filter_strategy.value == "auto":
+    if search_params.filter_strategy.value == "auto":
         # 如果重排成功，就用重排分过滤，否则用向量分
         if is_ranker:
             target_field = "relevance_score"
-            logger.info(f"使用重排分数过滤 (阈值: {score})")
+            logger.info(f"使用重排分数过滤 (阈值: {search_params.score})")
         else:
             target_field = "score"
-            logger.info(f"重排未启用或失败，使用向量分数过滤 (阈值: {score})")
+            logger.info(f"重排未启用或失败，使用向量分数过滤 (阈值: {search_params.score})")
     else:
         # 强制指定了要过滤的字段
-        target_field = filter_strategy.value
+        target_field = search_params.filter_strategy.value
 
     # 3. 执行动态过滤
-    final_results = filter_results_dynamic(all_results, score, target_field)
+    final_results = filter_results_dynamic(all_results, search_params.score, target_field)
 
     # 格式化并且合并两种查询的结果
     return final_results
 
 
 if __name__ == '__main__':
-    print(search_by_scores('财税融合大数据应用赛项是什么', score=0.4, filter_strategy=ScoreField.RELEVANCE))
+    parms = VectorSearchParams(query='财税融合大数据应用赛项是什么', score=0.4, filter_strategy=ScoreField.RELEVANCE)
+    print(search_by_scores(parms))
 

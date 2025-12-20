@@ -27,7 +27,6 @@ class Message(BaseModel):
             self.timestamp = datetime.now()
 
 
-
 class ChatMessageManager:
     """聊天消息管理器"""
 
@@ -41,7 +40,7 @@ class ChatMessageManager:
     def _touch(self):
         """更新最后访问时间"""
         self.last_accessed = datetime.now()
-    
+
     def set_system_message(self, content: str) -> None:
         """
         设置系统消息（只保留一条）
@@ -51,7 +50,7 @@ class ChatMessageManager:
         """
         self.system_message = Message(role=MessageType.SYSTEM, content=content)
         self._touch()
-    
+
     def add_human_message(self, content: str) -> None:
         """
         添加用户消息
@@ -60,7 +59,7 @@ class ChatMessageManager:
             content: 用户消息内容
         """
         self._add_message(Message(role=MessageType.HUMAN, content=content))
-    
+
     def add_ai_message(self, content: str) -> None:
         """
         添加AI消息
@@ -69,13 +68,13 @@ class ChatMessageManager:
             content: AI消息内容
         """
         self._add_message(Message(role=MessageType.AI, content=content))
-    
+
     def _add_message(self, message: Message) -> None:
         self.messages.append(message)
         if len(self.messages) > self.max_messages:
             self.messages.pop(0)
-        self._touch() # 每次添加消息都视为一次活跃访问
-    
+        self._touch()  # 每次添加消息都视为一次活跃访问
+
     def list_messages(self) -> List[Message]:
         """
         获取所有消息列表（包括系统消息）
@@ -88,7 +87,7 @@ class ChatMessageManager:
             result.append(self.system_message)
         result.extend(self.messages)
         return result
-    
+
     def get_messages_for_llm(self) -> List[dict]:
         """
         获取适用于LLM调用的消息格式
@@ -102,7 +101,7 @@ class ChatMessageManager:
                 "role": self.system_message.role.value,
                 "content": self.system_message.content
             })
-        
+
         for message in self.messages:
             messages.append({
                 "role": message.role.value,
@@ -110,7 +109,7 @@ class ChatMessageManager:
             })
         self._touch()  # 读取也算活跃
         return messages
-    
+
     def get_messages_for_openai(self) -> List[dict]:
         messages = []
         if self.system_message:
@@ -118,18 +117,18 @@ class ChatMessageManager:
         for message in self.messages:
             role = "user" if message.role == MessageType.HUMAN else "assistant"
             messages.append({"role": role, "content": message.content})
-        self._touch() # 读取也算活跃
+        self._touch()  # 读取也算活跃
         return messages
-    
+
     def clear_messages(self) -> None:
         """清空所有非系统消息"""
         self.messages.clear()
-    
+
     def clear_all(self) -> None:
         """清空所有消息（包括系统消息）"""
         self.messages.clear()
         self.system_message = None
-    
+
     def get_message_count(self) -> int:
         """
         获取消息总数（不包括系统消息）
@@ -138,7 +137,7 @@ class ChatMessageManager:
             消息数量
         """
         return len(self.messages)
-    
+
     def get_total_count(self) -> int:
         """
         获取总消息数（包括系统消息）
@@ -155,8 +154,8 @@ class ChatMessageManager:
         return {
             "max_messages": self.max_messages,
             "last_accessed": self.last_accessed.isoformat(),
-            "system_message": self.system_message.model_dump(mode='json') if self.system_message else None,
-            "messages": [m.model_dump(mode='json') for m in self.messages]
+            "system_message": self.system_message.model_dump(mode='json') if self.system_message is not None else None,
+            "messages": [i.model_dump(mode='json') if isinstance(i, Message) else i for i in self.messages]
         }
 
     @classmethod
