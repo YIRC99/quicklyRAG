@@ -1,5 +1,12 @@
 from quicklyRag.baseClass.documentBase import RagDocumentInfo
+from quicklyRag.vector.store.vectorStore import ScoreField
 
+# 默认向量检索返回的文档段数
+default_top_k = 10
+# 默认的文件检索分数
+default_vector_search_score = 0.3
+# 默认的分数过滤策略
+default_score_filter_strategy = ScoreField.AUTO
 
 # 文档拆分配置
 rag_document_info = RagDocumentInfo(

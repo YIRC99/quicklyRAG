@@ -24,12 +24,10 @@ from quicklyRag.provider.QuicklyChatModelProvider import QuicklyChatModelProvide
 from quicklyRag.vector.embedding.vectorEmbedding import embed_document
 from quicklyRag.vector.store.vectorStore import store_vector_by_documents, search_by_scores, VectorSearchParams
 
-def _format_sse(data: str | dict) -> str:
-    """将数据格式化为 SSE 标准字符串"""
-    if isinstance(data, dict):
-        data = json.dumps(data, ensure_ascii=False)
-    # SSE 规范: 以 data: 开头，双换行结尾
-    return f"data: {data}\n\n"
+
+# YIRC99 TODO 2025/12/20 目前添加向量化的方法写好了
+# YIRC99 TODO 2025/12/20 1. 还需要对文档进行list查询, 获取向量数据库中的数据
+# YIRC99 TODO 2025/12/20 2. 还需要对文档进行批量删除的方法
 
 # 向量化文档 只需要传入一个 文件路径 即可把文档向量化到向量数据库中
 def vectorize_file(
@@ -92,10 +90,14 @@ def vectorize_file(
         logger.error(f"处理文件 {file_path} 时发生错误: {str(e)}")
         return False
 
+def _format_sse(data: str | dict) -> str:
+    """将数据格式化为 SSE 标准字符串"""
+    if isinstance(data, dict):
+        data = json.dumps(data, ensure_ascii=False)
+    # SSE 规范: 以 data: 开头，双换行结尾
+    return f"data: {data}\n\n"
 
-
-
-# TODO 模型流式对话
+# SSE模型流式对话
 def llm_stream_chat(question: str,
                     session_id: str = None,
                     prompt_name: str = 'system',
@@ -105,7 +107,7 @@ def llm_stream_chat(question: str,
         session_id = str(uuid.uuid4())
 
     # 1.查询对话记忆 先获取管理session 在根据userid获取管理器 在从管理器中获取全部对话记录
-    session = ChatSessionManager(db_path=session_id + '.db', default_max_messages=100, ttl_seconds=3600 * 24 * 7)
+    session = ChatSessionManager(db_path='chat.db', default_max_messages=100, ttl_seconds=3600 * 24 * 7)
     message_manager = session.get_session(session_id)
     logger.info(f'查询到的消息记录: {message_manager.list_messages()}')
 
@@ -117,6 +119,7 @@ def llm_stream_chat(question: str,
         search_params = VectorSearchParams(query=question)
     scores = search_by_scores(search_params)
     context_str = "\n\n".join([f"<资料片段>\n\n: {res.text}\n\n<资料片段>\n\n" for res in scores])
+    logger.info(f'向量检索结果: {context_str}')
 
     # 3.添加提示词 获取管理器对象
     # 然后默认读取系统提示词 需要给系统提示词一个名称 默认会读取SystemPromptManager类下的system.md当作系统提示词 也可以传入file_path
@@ -166,22 +169,22 @@ def llm_stream_chat(question: str,
 
 
 
-if __name__ == '__main__':
-
-    set_debug(True)  # 启用 LangChain 调试模式
-    for token in llm_stream_chat(
-            question='我喜欢什么你知道吗?',
-            session_id='a8c67b91-f9c7-46d2-8610-bc1a8ea82e63',
-    ):
-        print(token, end='', flush=True)  # 实时打印每个token而不换行
-    print()  # 最后换行以保证终端显示整洁
-
-    for token in llm_stream_chat(
-            question='江西省职业院校技能大赛高职组数字化设计与制造赛项有什么介绍?',
-            session_id='a8c67b91-f9c7-46d2-8610-bc1a8ea82e63',
-    ):
-        print(token, end='', flush=True)  # 实时打印每个token而不换行
-    print()  # 最后换行以保证终端显示整洁
+# if __name__ == '__main__':
+#
+#     set_debug(True)  # 启用 LangChain 调试模式
+#     for token in llm_stream_chat(
+#             question='我喜欢什么你知道吗?',
+#             session_id='a8c67b91-f9c7-46d2-8610-bc1a8ea82e63',
+#     ):
+#         print(token, end='', flush=True)  # 实时打印每个token而不换行
+#     print()  # 最后换行以保证终端显示整洁
+#
+#     for token in llm_stream_chat(
+#             question='江西省职业院校技能大赛高职组数字化设计与制造赛项有什么介绍?',
+#             session_id='a8c67b91-f9c7-46d2-8610-bc1a8ea82e63',
+#     ):
+#         print(token, end='', flush=True)  # 实时打印每个token而不换行
+#     print()  # 最后换行以保证终端显示整洁
 
 
 

@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 # from quicklyRag.baseEnum.PlatformEnum import PlatformEmbeddingType
 from quicklyRag.baseEnum.VectorEnum import VectorStorageType
+from quicklyRag.config.DocumentConfig import default_top_k, default_vector_search_score, default_score_filter_strategy
 # from quicklyRag.config.PlatformConfig import default_embedding_use_platform
 from quicklyRag.config.VectorConfig import default_embedding_database_type
 from quicklyRag.provider.QuicklyRerankerProvider import QuicklyRerankerProvider
@@ -30,9 +31,9 @@ class ScoreField(Enum):
 # 向量搜索的查询参数类, 只有query是必须传入的
 class VectorSearchParams(BaseModel):
     query: str = Field(..., description="查询内容")
-    top_k: int = Field(default=10, description="返回的文档数量")
-    score: float = Field(default=0.3, description="文档过滤分数")
-    filter_strategy: ScoreField = Field(default=ScoreField.AUTO, description="过滤策略")
+    top_k: int = Field(default=default_top_k, description="返回的文档数量")
+    score: float = Field(default=default_vector_search_score, description="文档过滤分数")
+    filter_strategy: ScoreField = Field(default=default_score_filter_strategy, description="过滤策略")
     vectorstore_type: VectorStorageType = Field(default=default_embedding_database_type, description="向量存储库类型")
 
 
