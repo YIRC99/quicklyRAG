@@ -167,8 +167,6 @@ def llm_stream_chat(question: str,
         logger.error(f"流式对话出错: {e}")
         yield f"出错啦: {e}"
 
-
-
 if __name__ == '__main__':
 
     set_debug(True)  # 启用 LangChain 调试模式
