@@ -19,6 +19,11 @@ class VectorMetricType(Enum):
     L2 = "L2"
     COSINE = "COSINE"
 
+class ScoreField(Enum):
+    RELEVANCE = "relevance_score"
+    VECTOR = "score"
+    AUTO = 'auto'
+
 
 class VectorStorageType(Enum):
     # REDIS = "redis" 暂不支持

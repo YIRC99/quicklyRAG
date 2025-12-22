@@ -2,11 +2,13 @@ from typing import Optional
 
 import faiss
 from langchain_community.docstore import InMemoryDocstore
-from langchain_core.embeddings import Embeddings
 
-from quicklyRag.baseEnum.VectorEnum import VectorIndexType, VectorMetricType
+from quicklyRag.baseEnum.VectorEnum import  VectorMetricType, VectorStorageType, ScoreField
 from quicklyRag.provider.QuicklyEmbeddingModelProvider import QuicklyEmbeddingModelProvider
 from pydantic import BaseModel, Field
+
+
+
 
 class QuicklyMilvusConfig(BaseModel):
     uri: str = Field(..., description="Milvus的服务地址")

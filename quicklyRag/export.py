@@ -169,22 +169,22 @@ def llm_stream_chat(question: str,
 
 
 
-# if __name__ == '__main__':
-#
-#     set_debug(True)  # 启用 LangChain 调试模式
-#     for token in llm_stream_chat(
-#             question='我喜欢什么你知道吗?',
-#             session_id='a8c67b91-f9c7-46d2-8610-bc1a8ea82e63',
-#     ):
-#         print(token, end='', flush=True)  # 实时打印每个token而不换行
-#     print()  # 最后换行以保证终端显示整洁
-#
-#     for token in llm_stream_chat(
-#             question='江西省职业院校技能大赛高职组数字化设计与制造赛项有什么介绍?',
-#             session_id='a8c67b91-f9c7-46d2-8610-bc1a8ea82e63',
-#     ):
-#         print(token, end='', flush=True)  # 实时打印每个token而不换行
-#     print()  # 最后换行以保证终端显示整洁
+if __name__ == '__main__':
+
+    set_debug(True)  # 启用 LangChain 调试模式
+    for token in llm_stream_chat(
+            question='我喜欢什么你知道吗?',
+            session_id='a8c67b91-f9c7-46d2-8610-bc1a8ea82e63',
+    ):
+        print(token, end='', flush=True)  # 实时打印每个token而不换行
+    print()  # 最后换行以保证终端显示整洁
+
+    for token in llm_stream_chat(
+            question='江西省职业院校技能大赛高职组数字化设计与制造赛项有什么介绍?',
+            session_id='a8c67b91-f9c7-46d2-8610-bc1a8ea82e63',
+    ):
+        print(token, end='', flush=True)  # 实时打印每个token而不换行
+    print()  # 最后换行以保证终端显示整洁
 
 
 

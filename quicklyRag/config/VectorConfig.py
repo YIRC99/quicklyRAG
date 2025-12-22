@@ -2,10 +2,12 @@
 import faiss
 from langchain_community.docstore import InMemoryDocstore
 
-from quicklyRag.baseClass.VectorBase import QuicklyMilvusConfig, MyFaissConfig
 from quicklyRag.baseEnum.PlatformEnum import PlatformEmbeddingType
-from quicklyRag.baseEnum.VectorEnum import VectorStorageType, VectorMetricType, VectorIndexType
+from quicklyRag.baseEnum.VectorEnum import VectorMetricType, VectorIndexType, VectorStorageType
 from quicklyRag.provider.QuicklyEmbeddingModelProvider import QuicklyEmbeddingModelProvider
+
+
+from quicklyRag.baseClass.VectorBase import QuicklyMilvusConfig, MyFaissConfig
 
 # 向量存储 默认使用的向量库
 default_embedding_database_type = VectorStorageType.MILVUS

@@ -1,4 +1,6 @@
 from functools import lru_cache
+from typing import Optional
+
 from httpx import ConnectError, TimeoutException
 from langchain_core.language_models import BaseChatModel
 from langchain_ollama import ChatOllama
@@ -31,7 +33,7 @@ class QuicklyChatModelProvider(BaseModel):
             ValueError: 如果 platform_type 不受支持。
         """
         super().__init__(platform_type=platform_type, **data)
-        self._chat_model: BaseChatModel | None = None
+        self._chat_model: Optional[BaseChatModel] = None
         try:
             self._chat_model = self._get_chat_model_instance(platform_type)
         except ChatModelInitializationError:
