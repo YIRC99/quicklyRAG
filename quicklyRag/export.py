@@ -13,7 +13,7 @@ from quicklyRag.baseClass.documentBase import RagDocumentInfo
 from quicklyRag.baseEnum.PlatformEnum import PlatformEmbeddingType, PlatformChatModelType
 from quicklyRag.chat.message.ChatSessionManager import ChatSessionManager
 from quicklyRag.chat.message.chatMessage import convert_history_to_langchain_format
-from quicklyRag.chat.propmt.SystemPromptManager import SystemPromptManager
+from quicklyRag.chat.prompt.SystemPromptManager import SystemPromptManager
 from quicklyRag.baseEnum.VectorEnum import VectorStorageType
 from quicklyRag.config.DocumentConfig import rag_document_info
 from quicklyRag.config.PlatformConfig import default_embedding_use_platform, default_chat_model_use_platform
@@ -107,7 +107,7 @@ def llm_stream_chat(question: str,
         session_id = str(uuid.uuid4())
 
     # 1.查询对话记忆 先获取管理session 在根据userid获取管理器 在从管理器中获取全部对话记录
-    session = ChatSessionManager(db_path='chat.db', default_max_messages=100, ttl_seconds=3600 * 24 * 7)
+    session = ChatSessionManager(default_max_messages=100, ttl_seconds=3600 * 24 * 7)
     message_manager = session.get_session(session_id)
     logger.info(f'查询到的消息记录: {message_manager.list_messages()}')
 

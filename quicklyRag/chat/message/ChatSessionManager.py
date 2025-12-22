@@ -9,6 +9,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 from quicklyRag.chat.message.chatMessageManager import ChatMessageManager
+from quicklyRag.config.ChatConfig import default_session_db_path
 
 
 class ChatSessionManager:
@@ -16,7 +17,7 @@ class ChatSessionManager:
     支持 内存管理 + SQLite持久化 + TTL自动过期的会话管理器
     """
 
-    def __init__(self, db_path: str = None, default_max_messages: int = 50, ttl_seconds: int = 3600):
+    def __init__(self, db_path: str = default_session_db_path, default_max_messages: int = 50, ttl_seconds: int = 3600):
         """
         Args:
             db_path: SQLite文件路径 (例如 'chat_history.db'). 如果为None，则纯内存运行.
