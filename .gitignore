@@ -1,0 +1,29 @@
+# 编译缓存
+__pycache__/
+*.py[cod]
+*$py.class
+# 虚拟环境
+venv/
+venv/
+env/
+ENV/
+# 打包/构建
+build/
+dist/
+*.egg-info/
+eggs/
+# 日志与测试缓存
+*.log
+htmlcov/
+tox/
+pytest_cache/
+# Jupyter Notebook 检查点
+ipynb_checkpoints/
+# IDE 配置
+vscode/
+idea/
+# 数据库与本地配置
+db.sqlite3
+local_settings.py
+
+.env
