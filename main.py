@@ -5,7 +5,8 @@ from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from quicklyRag.export import llm_stream_chat
+import quickly_rag
+
 app = FastAPI()
 
 
@@ -17,7 +18,7 @@ class ChatRequest(BaseModel):
 @app.post('/chat/stream')
 def chat_stream(parms: ChatRequest):
     return StreamingResponse(
-        llm_stream_chat(parms.question, parms.session_id),
+        quickly_rag.llm_stream_chat(parms.question, parms.session_id),
         media_type="text/event-stream"  # 必须指定这个 header
     )
 
