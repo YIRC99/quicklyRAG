@@ -7,6 +7,13 @@ class QuicklySiliconflowAiConfig(BaseModel):
     embedding_model: str = Field(default="Qwen/Qwen3-Embedding-8B", description=" siliconflow的嵌入模型名称")
     key: str = Field(..., description=" siliconflow的密钥")
 
+
+class QuicklyAliyunAiConfig(BaseModel):
+    base_url: str = Field(default="POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions", description="阿里云的请求地址")
+    chat_model: str = Field(default="qwen3:0.6b", description="阿里云的模型名称")
+    embedding_model: str = Field(default="qwen3:0.6b", description="阿里云的嵌入模型名称")
+    key: str = Field(..., description="阿里云的密钥")
+
 class QuicklyAzureAiConfig(BaseModel):
     base_url: str = Field(default="https://99313-mafhdjdl-eastus2.cognitiveservices.azure.com", description="亚马逊的请求地址")
     chat_model: str = Field(default="gpt-4.1", description="亚马逊的模型名称")

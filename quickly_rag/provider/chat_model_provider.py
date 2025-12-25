@@ -1,14 +1,16 @@
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, Any
 
 from httpx import ConnectError, TimeoutException
-from langchain_core.language_models import BaseChatModel
+from langchain_core.language_models import BaseChatModel, LanguageModelInput
+from langchain_core.messages import AIMessage
+from langchain_core.runnables import RunnableConfig
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI, AzureChatOpenAI
 from loguru import logger
 from pydantic import BaseModel, Field
 
-from quickly_rag.config.platform_config import MySiliconflowAiInfo, MyAzureAiInfo, MyOllamaInfo
+from quickly_rag.config.platform_config import MySiliconflowAiInfo, MyAzureAiInfo, MyOllamaInfo, MyAliyunAiInfo
 from quickly_rag.enums.platform_enum import PlatformChatModelType
 
 
@@ -52,6 +54,8 @@ class QuicklyChatModelProvider(BaseModel):
                 return self.__azure_chat()
             elif platform_type == PlatformChatModelType.OLLAMA:
                 return self.__ollama_chat()
+            elif platform_type == PlatformChatModelType.ALIYUN:
+                return self.__aliyun_chat()
             else:
                 raise ValueError(f"Unsupported chat model platform type: {platform_type}")
         except ChatModelInitializationError:
@@ -84,6 +88,28 @@ class QuicklyChatModelProvider(BaseModel):
         except Exception as e:
             logger.error(f"Error creating SiliconFlow chat model: {e}")
             raise ChatModelInitializationError("SiliconFlow chat model initialization failed.") from e
+
+
+    @staticmethod
+    @lru_cache(maxsize=1)
+    def __aliyun_chat() -> ChatOpenAI:
+        """【内部】创建并返回 aliyun 聊天模型实例 (单例)"""
+        try:
+            # 提前检查一下 key是否存在, 不存在就抛出报错
+            if not MyAliyunAiInfo.key:
+                logger.error('aliyun API key 没有设置, 请在platform_config文件中设置。')
+                raise RuntimeError('aliyun API key 没有设置, 请在platform_config文件中设置。')
+
+            model = ChatOpenAI(
+                model=MyAliyunAiInfo.chat_model,
+                base_url=MyAliyunAiInfo.base_url,
+                api_key=MyAliyunAiInfo.key,
+            )
+            logger.info("aliyun chat model initialized successfully.")
+            return model
+        except Exception as e:
+            logger.error(f"Error creating aliyun chat model: {e}")
+            raise ChatModelInitializationError("aliyun chat model initialization failed.") from e
 
     @staticmethod
     @lru_cache(maxsize=1)
@@ -141,5 +167,13 @@ class QuicklyChatModelProvider(BaseModel):
         """检查聊天模型实例是否已成功初始化并可用。"""
         return self._chat_model is not None
 
-    def invoke(self, input: str, **kwargs):
-        return self.chat_model.invoke(input, **kwargs)
+    def invoke(
+            self,
+            input: LanguageModelInput,
+            config: RunnableConfig | None = None,
+            *,
+            stop: list[str] | None = None,
+            **kwargs: Any,
+    ) -> AIMessage:
+        """调用底层聊天模型实例对象 (SiliconFlow, Azure, Ollama 等)。"""
+        return self.chat_model.invoke(input=input,config=config,stop=stop,**kwargs)

@@ -1,6 +1,7 @@
 import traceback
 from functools import lru_cache
 from httpx import ConnectError, TimeoutException
+from langchain_community.embeddings import DashScopeEmbeddings
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_ollama import OllamaEmbeddings
@@ -8,7 +9,7 @@ from langchain_openai import OpenAIEmbeddings
 from loguru import logger
 from pydantic import BaseModel, Field
 
-from quickly_rag.config.platform_config import MySiliconflowAiInfo, MyOllamaInfo
+from quickly_rag.config.platform_config import MySiliconflowAiInfo, MyOllamaInfo, MyAliyunAiInfo
 from quickly_rag.enums.platform_enum import PlatformEmbeddingType
 
 
@@ -33,14 +34,39 @@ class QuicklyEmbeddingModelProvider(Embeddings,BaseModel):
                 return self.__siliconflow_embed()
             elif platform_type == PlatformEmbeddingType.AZURE:
                 raise NotImplementedError("Azure embedding model provider not implemented yet.")
-            elif platform_type == PlatformEmbeddingType.OLLAMA:
-                return self.__ollama_embed()
+            elif platform_type == PlatformEmbeddingType.ALIYUN:
+                return self.__aliyun_embed()
             else:
                 raise ValueError(f"Unsupported platform type: {platform_type}")
         except NotImplementedError:
             raise
         except Exception as e:
             logger.warning(f"Failed to initialize embedding model for {platform_type.name}: {e}")
+            raise
+
+    @staticmethod
+    @lru_cache(maxsize=1)
+    def __aliyun_embed() -> OpenAIEmbeddings:
+        try:
+            # 提前检查一下 key是否存在, 不存在就抛出报错
+            if not MyAliyunAiInfo.key:
+                logger.error('aliyun API key 没有设置, 请在platform_config文件中设置。')
+                raise RuntimeError('aliyun API key 没有设置, 请在platform_config文件中设置。')
+
+            model = DashScopeEmbeddings(
+                dashscope_api_key=MyAliyunAiInfo.key,
+                model=MyAliyunAiInfo.embedding_model
+            )
+
+            # model = OpenAIEmbeddings(
+            #     model=MyAliyunAiInfo.embedding_model,
+            #     base_url=MyAliyunAiInfo.base_url,
+            #     api_key=MyAliyunAiInfo.key,
+            # )
+            logger.info("aliyun embedding model initialized successfully.")
+            return model
+        except Exception as e:
+            logger.error(f"Error creating aliyun embedding model: {e}")
             raise
 
     @staticmethod

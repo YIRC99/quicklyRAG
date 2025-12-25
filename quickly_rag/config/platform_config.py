@@ -2,15 +2,24 @@ import os
 
 import dotenv
 
-from quickly_rag.core.Platform_base import QuicklySiliconflowAiConfig, QuicklyAzureAiConfig, QuicklyOllamaAiConfig
+from quickly_rag.core.Platform_base import QuicklySiliconflowAiConfig, QuicklyAzureAiConfig, QuicklyOllamaAiConfig, \
+    QuicklyAliyunAiConfig
 from quickly_rag.enums.platform_enum import PlatformEmbeddingType, PlatformChatModelType
 dotenv.load_dotenv()
 
 
 #向量化默认使用的平台
-default_embedding_use_platform = PlatformEmbeddingType.SILICONFLOW
+default_embedding_use_platform = PlatformEmbeddingType.ALIYUN
 # 聊天模型默认使用的平台
-default_chat_model_use_platform = PlatformChatModelType.SILICONFLOW
+default_chat_model_use_platform = PlatformChatModelType.ALIYUN
+
+# 硅基流动平台配置
+MyAliyunAiInfo = QuicklyAliyunAiConfig(
+    base_url='https://dashscope.aliyuncs.com/compatible-mode/v1',
+    chat_model='qwen3-max',
+    embedding_model='text-embedding-v4',
+    key=os.getenv("ALIYUN_API_KEY")
+)
 
 # 硅基流动平台配置
 MySiliconflowAiInfo = QuicklySiliconflowAiConfig(
@@ -19,6 +28,8 @@ MySiliconflowAiInfo = QuicklySiliconflowAiConfig(
     embedding_model='Qwen/Qwen3-Embedding-8B',
     key=os.getenv("OPENAI_API_KEY")
 )
+
+
 
 # 创建亚马逊平台gpt的配置
 MyAzureAiInfo = QuicklyAzureAiConfig(
