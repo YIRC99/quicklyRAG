@@ -1,4 +1,7 @@
 # 支持本地内存 redisSession Milvus 存储向量
+import os
+
+import dotenv
 from langchain_community.docstore import InMemoryDocstore
 
 from quickly_rag.config.platform_config import default_embedding_use_platform
@@ -6,24 +9,27 @@ from quickly_rag.core.Vector_base import QuicklyMilvusConfig, MyFaissConfig, Qui
 from quickly_rag.enums.platform_enum import PlatformEmbeddingType
 from quickly_rag.enums.vector_enum import VectorStorageType, VectorMetricType, VectorIndexType
 from quickly_rag.provider.embedding_model_provider import QuicklyEmbeddingModelProvider
-
-# 向量存储 默认使用的向量库
-default_embedding_database_type = VectorStorageType.MILVUS
-
+dotenv.load_dotenv()
 
 def get_embedding_model(
         embedding_type: PlatformEmbeddingType = default_embedding_use_platform) -> QuicklyEmbeddingModelProvider:
     return QuicklyEmbeddingModelProvider(embedding_type)
 
 
+
+# 向量存储 默认使用的向量库
+default_embedding_database_type = VectorStorageType.CHROMA
+
+# 本地使用Chroma存储向量数据是的配置, 只需要默认关心存储路径即可
 MyChromaInfo = QuicklyChromaConfig(
     embedding_model=get_embedding_model(default_embedding_use_platform),
     persist_dir="./quickly_rag_data/chroma_db",
     collection_name = "quickly_rag_chroma_collection",
 )
 
+# Milvus 的链接配置
 MyMilieusInfo = QuicklyMilvusConfig(
-    uri='99999999999',
+    uri=os.getenv("MILVUS_URL"),
     user='',
     password='',
     port=19530,

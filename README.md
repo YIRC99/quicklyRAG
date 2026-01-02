@@ -73,7 +73,10 @@ uv sync
 # 或者使用 pip
 pip install -r requirements.txt
 ```
-### 4. Hello World
+### 4. 修改配置文件
+配置文件位于 `quickly_rag/config/` 目录下。
+建议全部阅读一下
+### 5. Hello World
 在你的代码中引入 API 即可开始使用：
 ```bash
 # main.py
