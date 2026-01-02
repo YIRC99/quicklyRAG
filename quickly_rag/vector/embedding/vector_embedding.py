@@ -76,8 +76,8 @@ def vectorize_file(
 
         # 3. 向量化文档
         logger.info("正在进行文档向量化...")
-        embeds = embed_document(documents, embedding_type)
-        logger.success(f"向量化成功, 向量数量: {len(embeds)}, 向量维度: {len(embeds[0]) if embeds and len(embeds) > 0 else 'N/A'}")
+        # embeds = embed_document(documents, embedding_type)
+        # logger.success(f"向量化成功, 向量数量: {len(embeds)}, 向量维度: {len(embeds[0]) if embeds and len(embeds) > 0 else 'N/A'}")
 
         # 4. 存储向量
         logger.info("正在存储向量到数据库...")

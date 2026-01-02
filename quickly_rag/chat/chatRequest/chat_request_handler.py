@@ -96,13 +96,17 @@ def llm_stream_chat(question: str,
 
 
 # 调用模型对话, 一次性返回
-def llm_chat(question: str,
+def llm_chat(question: str = None,
                     session_id: str = None,
                     prompt_name: str = 'system',
                     search_params :VectorSearchParams = None,
                     platform_type: PlatformChatModelType = default_chat_model_use_platform) -> dict[str, str] | str:
     if session_id is None:
         session_id = str(uuid.uuid4())
+    if search_params.query is None and question is None:
+        raise ValueError("请传入问题或者向量检索参数")
+    if search_params.query is not None and question is None:
+        question = search_params.query
 
     # 1.查询对话记忆 先获取管理session 在根据userid获取管理器 在从管理器中获取全部对话记录
     session = ChatSessionManager(default_max_messages=100, ttl_seconds=3600 * 24 * 7)
@@ -117,7 +121,7 @@ def llm_chat(question: str,
         search_params = VectorSearchParams(query=question)
     scores = search_by_scores(search_params)
     context_str = "\n\n".join([f"<资料片段>\n\n: {res.text}\n\n<资料片段>\n\n" for res in scores])
-    logger.info(f'向量检索结果: {context_str}')
+    # logger.info(f'向量检索结果: {context_str}')
 
     # 3.添加提示词 获取管理器对象
     # 然后默认读取系统提示词 需要给系统提示词一个名称 默认会读取SystemPromptManager类下的system.md当作系统提示词 也可以传入file_path

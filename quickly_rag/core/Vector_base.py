@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional
 
 import faiss
@@ -7,6 +8,12 @@ from pydantic import BaseModel, Field
 
 from quickly_rag.enums.vector_enum import VectorMetricType
 from quickly_rag.provider.embedding_model_provider import QuicklyEmbeddingModelProvider
+
+class QuicklyChromaConfig(BaseModel):
+    embedding_model: QuicklyEmbeddingModelProvider = Field(..., description="嵌入模型实例")
+    persist_dir: str | Path = Field(..., description="向量数据库持久化目录")
+    collection_name: str = Field(..., description="向量数据库集合名称")
+    pass
 
 
 class QuicklyMilvusConfig(BaseModel):

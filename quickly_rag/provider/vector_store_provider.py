@@ -1,6 +1,8 @@
+import os
 from functools import lru_cache
 from typing import Type, Any
 
+from langchain_chroma import Chroma
 from langchain_community.docstore import InMemoryDocstore
 from langchain_community.vectorstores import FAISS
 from langchain_core.vectorstores import VectorStore
@@ -8,7 +10,7 @@ from langchain_milvus import Milvus
 from loguru import logger
 from pydantic import BaseModel, Field
 
-from quickly_rag.config.vector_config import MyMilieusInfo, MyFaissInfo
+from quickly_rag.config.vector_config import MyMilieusInfo, MyFaissInfo, MyChromaInfo
 from quickly_rag.enums.vector_enum import VectorStorageType
 
 
@@ -75,6 +77,31 @@ class QuicklyVectorStoreProvider(BaseModel):
             raise VectorStoreInitializationError("Milvus connection or initialization failed.") from e
 
     @staticmethod
+    def __create_chroma_store() -> Chroma:
+        """
+        【内部】创建并返回 Chroma 向量库实例 (本地持久化)
+        这就是任何人都能跑的关键！
+        """
+        try:
+            # 确保数据存储目录存在
+            persist_dir = MyChromaInfo.persist_dir
+            if not os.path.exists(persist_dir):
+                os.makedirs(persist_dir)
+
+            logger.info(f"Initializing ChromaDB at {persist_dir}...")
+
+            chroma_instance = Chroma(
+                collection_name=MyChromaInfo.collection_name,  # 集合名称
+                embedding_function=MyChromaInfo.embedding_model,  # 使用你的 Embedding 模型
+                persist_directory=persist_dir,  # 数据持久化到本地文件夹
+            )
+            logger.info("Successfully initialized ChromaDB.")
+            return chroma_instance
+        except Exception as e:
+            logger.error(f"Failed to initialize ChromaDB: {e}")
+            raise VectorStoreInitializationError("ChromaDB initialization failed.") from e
+
+    @staticmethod
     @lru_cache(maxsize=1)
     def __create_faiss_store() -> FAISS:
         """【内部】创建并返回 FAISS 向量库实例 (初始空状态, 单例)"""
@@ -96,8 +123,10 @@ class QuicklyVectorStoreProvider(BaseModel):
         try:
             if platform_type == VectorStorageType.MILVUS:
                 return self.__create_milvus_store()
-            elif platform_type == VectorStorageType.FAISS:
-                return self.__create_faiss_store()
+            elif platform_type == VectorStorageType.CHROMA:
+                return self.__create_chroma_store()
+            # elif platform_type == VectorStorageType.FAISS:
+            #     return self.__create_faiss_store()
             else:
                 raise ValueError(f"Unsupported vector store platform type: {platform_type}")
         except VectorStoreInitializationError:

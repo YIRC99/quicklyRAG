@@ -28,6 +28,7 @@ class ScoreField(Enum):
 class VectorStorageType(Enum):
     # REDIS = "redis" 暂不支持
     MILVUS = "milvus"
-    # FAISS = 'FAISS'暂不支持
+    CHROMA = "chroma"
+    FAISS = 'FAISS'  #暂不支持
 
 
