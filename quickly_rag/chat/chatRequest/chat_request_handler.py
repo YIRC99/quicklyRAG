@@ -1,8 +1,12 @@
 import json
 import uuid
 from collections.abc import Iterator
+
+from langchain.agents import create_agent
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessageChunk
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables.base import Other
 from langchain_core.runnables.utils import Output
 from loguru import logger
 
@@ -22,7 +26,6 @@ def _format_sse(data: str | dict) -> str:
         data = json.dumps(data, ensure_ascii=False)
     # SSE 规范: 以 data: 开头，双换行结尾
     return f"data: {data}\n\n"
-
 # SSE模型流式对话
 def llm_stream_chat(question: str,
                     session_id: str = None,
@@ -52,32 +55,30 @@ def llm_stream_chat(question: str,
     system_prompt_manager = SystemPromptManager()
     system_prompt = system_prompt_manager.get_prompt(prompt_name)
 
-    # 4.创建包含历史的提示模板
-    prompt_template = ChatPromptTemplate.from_messages([
-        ("system", system_prompt),
-        ("system", "以下是检索到的参考资料，请基于这些资料回答问题：\n\n{context_str}"),
-        ("placeholder", "{chat_history}"),
-        ("human", "{question}")
-    ])
 
     # 获取llm
     llm = QuicklyChatModelProvider(platform_type)
-    chain = prompt_template | llm.chat_model | StrOutputParser()
 
     try:
         # 使用 yield from 返回生成器，让上层调用者可以流式接收
         full_response = ""
-        for chunk in chain.stream({
-            "chat_history": converted_history,
-            "context_str": context_str,
-            "question": question
-        }):
-            if chunk:
-                full_response += chunk
+        agent = create_agent(model=llm.chat_model, tools=[], system_prompt=system_prompt)
+
+        # 4.创建包含历史的提示模板
+        full_system_content = f"{system_prompt}\n\n以下是检索到的参考资料，请基于这些资料回答问题：\n\n{context_str}"
+        input_messages = [SystemMessage(content=full_system_content)] + converted_history + [HumanMessage(content=question)]
+
+        for msg, metadata in agent.stream({"messages": input_messages}, stream_mode="messages"):
+
+            # 4. 过滤数据
+            if isinstance(msg, AIMessageChunk) and msg.content:
+                content = msg.content
+                full_response += content
+
                 payload = {
-                    "content": chunk,  # 当前片段
+                    "content": content,
                     "session_id": session_id,
-                    "status": "thinking"  # 标识正在生成
+                    "status": "thinking"
                 }
                 yield _format_sse(payload)
 
@@ -93,12 +94,13 @@ def llm_stream_chat(question: str,
         logger.error(f"流式对话出错: {e}")
         yield f"出错啦: {e}"
 
+
 # 调用模型对话, 一次性返回
 def llm_chat(question: str,
                     session_id: str = None,
                     prompt_name: str = 'system',
                     search_params :VectorSearchParams = None,
-                    platform_type: PlatformChatModelType = default_chat_model_use_platform) -> str:
+                    platform_type: PlatformChatModelType = default_chat_model_use_platform) -> dict[str, str] | str:
     if session_id is None:
         session_id = str(uuid.uuid4())
 
@@ -122,29 +124,28 @@ def llm_chat(question: str,
     system_prompt_manager = SystemPromptManager()
     system_prompt = system_prompt_manager.get_prompt(prompt_name)
 
-    # 4.创建包含历史的提示模板
-    prompt_template = ChatPromptTemplate.from_messages([
-        ("system", system_prompt),
-        ("system", "以下是检索到的参考资料，请基于这些资料回答问题：\n\n{context_str}"),
-        ("placeholder", "{chat_history}"),
-        ("human", "{question}")
-    ])
 
     # 获取llm
     llm = QuicklyChatModelProvider(platform_type)
-    chain = prompt_template | llm.chat_model | StrOutputParser()
-
-
+    # chain = prompt_template | llm.chat_model | StrOutputParser() 这个后处理会自动取出AI的回复内容
     try:
-        response = chain.invoke({"chat_history": converted_history, "context_str": context_str, "question": question})
 
+        agent = create_agent(model=llm.chat_model, tools=[], system_prompt=system_prompt)
+        # 4.创建包含历史的提示模板
+        full_system_content = f"{system_prompt}\n\n以下是检索到的参考资料，请基于这些资料回答问题：\n\n{context_str}"
+        input_messages = [SystemMessage(content=full_system_content)] + converted_history + [HumanMessage(content=question)]
+        result = agent.invoke({"messages": input_messages})
+        response = result["messages"][-1]
         # 8. 对话结束后，手动保存对话记录
         if response:
             message_manager.add_human_message(question)
-            message_manager.add_ai_message(response)
+            message_manager.add_ai_message(response.content)
             session.save_session(session_id)
-
-        return response
+        #
+        return {
+            "content": response,
+            "session_id": session_id,
+        }
 
     except Exception as e:
         logger.error(f"对话出错: {e}")

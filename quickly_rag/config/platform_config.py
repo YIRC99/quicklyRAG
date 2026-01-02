@@ -9,9 +9,9 @@ dotenv.load_dotenv()
 
 
 #向量化默认使用的平台
-default_embedding_use_platform = PlatformEmbeddingType.ALIYUN
+default_embedding_use_platform = PlatformEmbeddingType.SILICONFLOW
 # 聊天模型默认使用的平台
-default_chat_model_use_platform = PlatformChatModelType.ALIYUN
+default_chat_model_use_platform = PlatformChatModelType.SILICONFLOW
 
 # 硅基流动平台配置
 MyAliyunAiInfo = QuicklyAliyunAiConfig(
