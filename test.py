@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # embed = QuicklyEmbeddingModelProvider(PlatformEmbeddingType.ALIYUN)
     # print(embed.embedding_text("hello world"))
 
-    #
+
     # llm = QuicklyChatModelProvider(PlatformChatModelType.SILICONFLOW)
     # # start_time = time.time()
     # # print(llm.invoke("请用中文回答, 你是谁?"))
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     # print(agent.invoke(
     #     {"messages": [{"role": "user", "content": "介绍一下你自己"}]}
     # ))
-    #
+
 
     # provider = QuicklyEmbeddingModelProvider(PlatformEmbeddingType.SILICONFLOW)
     # print(provider.embed_query("hello"))
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     # logger.error(api.llm_chat("你知道我叫什么嘛",session_id='e0b16f06-ec48-42c9-8545-610f4b86a3c0'))
     # print(f"agent总耗时: {time.time() - start_time}")
 
-    # for chunk in api.llm_stream_chat("能不能帮我介绍一下江西省职业院校技能大赛",session_id='e0b16f06-ec48-42c9-8545-610f4b86a3c0'):
+    # for chunk in api.llm_stream_chat("能不能帮我介绍一下职业院校技能大赛",session_id='e0b16f06-ec48-42c9-8545-610f4b86a3c0'):
     #     print(chunk)
 
     # provider = QuicklyVectorStoreProvider(VectorStorageType.CHROMA)
@@ -54,6 +54,6 @@ if __name__ == '__main__':
     #                    vectorstore_type=VectorStorageType.MILVUS)
 
     logger.error(api.llm_chat(
-        search_params=VectorSearchParams(query='祝家俊擅长的技术是什么',
+        search_params=VectorSearchParams(query='擅长的技术是什么',
                                          score=0.1,
                                          vectorstore_type=VectorStorageType.MILVUS)))
