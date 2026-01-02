@@ -1,7 +1,7 @@
 <div align="center">
   <h1>⚡ QuicklyRag</h1>
   <p>
-    <strong>Python 项目的 AI “瑞士军刀” —— 一行代码，构建本地 RAG 知识库</strong>
+    <strong>Python 项目的 AI “瑞士军刀” —— 一行代码，构建 RAG 知识库</strong>
   </p>
 
   <p>
@@ -17,11 +17,9 @@
   </p>
 
   <p>
-    <a href="#-设计哲学">设计哲学</a> •
     <a href="#-核心特性">核心特性</a> •
     <a href="#-快速开始">快速开始</a> •
     <a href="#-项目架构">项目架构</a> •
-    <a href="#-配置指南">配置指南</a>
   </p>
 </div>
 
@@ -174,5 +172,7 @@ QuicklyRag 秉持“简单至上”的原则。如果你有更好的想法，欢
 3. 提交代码
 
 4. 新建 Pull Request
+### 任何问题欢迎联系作者
+<img src="./img/weixin.jpg" style="height: 300px"/>
 
 <p align="center"> Made with ❤️ by QuicklyRag Team </p>
