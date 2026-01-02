@@ -56,7 +56,7 @@
 
 ### 1. 获取项目
 ```bash
-git clone [https://github.com/zhangyuanyuan/QuicklyRag.git](https://github.com/zhangyuanyuan/QuicklyRag.git)
+git clone https://github.com/YIRC99/quicklyRAG.git
 ```
 
 ### 2. 集成到你的项目
